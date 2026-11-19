@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#111214" media="(prefers-color-scheme: dark)">
-<title>本地翻译</title>
+<title>镜译 Calque</title>
 <style>
 :root{color-scheme:light dark;
   --bg:#f6f7f9;--card:#fff;--ink:#16181d;--ink2:#3d4250;--muted:#5d6577;--line:#e3e6ec;--line2:#d5d9e0;
@@ -103,7 +103,7 @@ select{height:32px;padding:0 8px;border-radius:8px;border:1px solid var(--line2)
 <body>
 <div class="wrap">
   <header>
-    <h1>本地翻译</h1>
+    <h1>镜译 <span class="muted" style="font-weight:500">Calque</span></h1>
     <span class="muted" style="font-size:13px">本机模型 + 本机文字识别，文件不离开这台 Mac</span>
   </header>
 
@@ -337,7 +337,7 @@ async function refresh(){
   clearTimeout(timer);
   const s = await api('/api/state').catch(() => null);
   if (!s){
-    setEngine('err', '界面服务已停止，请重新打开「本地翻译」');
+    setEngine('err', '界面服务已停止，请重新打开「镜译」');
     $('#load').hidden = $('#unload').hidden = true;
     timer = setTimeout(refresh, 4000); return;
   }

@@ -1,9 +1,9 @@
 <div align="center">
 
-<a href="https://zjywlive.github.io/LocalTranslator/">
+<a href="https://zjywlive.github.io/Calque/">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
-    <img alt="LocalTranslator — layout-preserving document translation, fully offline" src="assets/hero-light.svg" width="100%">
+    <img alt="Calque — layout-preserving document translation, fully offline" src="assets/hero-light.svg" width="100%">
   </picture>
 </a>
 
@@ -13,12 +13,12 @@
   <img alt="Python 3.9+" src="https://img.shields.io/badge/python-3.9%2B-3776ab?style=flat-square&logo=python&logoColor=white">
   <img alt="100% offline" src="https://img.shields.io/badge/network-127.0.0.1%20only-1f9d55?style=flat-square">
   <img alt="No API key" src="https://img.shields.io/badge/API%20key-not%20needed-5d6577?style=flat-square">
-  <a href="https://github.com/zjywlive/LocalTranslator/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/zjywlive/LocalTranslator?style=flat-square&color=f0b429"></a>
+  <a href="https://github.com/zjywlive/Calque/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/zjywlive/Calque?style=flat-square&color=f0b429"></a>
 </p>
 
 <p>
   <b>English</b> · <a href="README.zh-CN.md">简体中文</a> ·
-  <a href="https://zjywlive.github.io/LocalTranslator/">Website &amp; live demo</a> ·
+  <a href="https://zjywlive.github.io/Calque/">Website &amp; live demo</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#faq">FAQ</a>
 </p>
@@ -27,13 +27,15 @@
 
 <img src="assets/demo.gif" alt="Dropping a paper in and watching it translate" width="88%">
 
+<sub><b>Calque</b> /kalk/ — a loan translation, word for word; in French, <i>calquer</i> means to trace. That is the idea: translate the text, trace the page. Its Chinese name is <b>镜译</b> (“mirror translation”).</sub>
+
 </div>
 
 ---
 
 ## Contents
 
-- [Why LocalTranslator](#why-localtranslator)
+- [Why Calque](#why-calque)
 - [What it looks like](#what-it-looks-like)
 - [Features](#features)
 - [Supported formats](#supported-formats)
@@ -45,9 +47,9 @@
 - [Roadmap](#roadmap)
 - [Acknowledgements & license](#acknowledgements--license)
 
-## Why LocalTranslator
+## Why Calque
 
-| | Cloud translators | LocalTranslator |
+| | Cloud translators | Calque |
 |---|---|---|
 | **Where your file goes** | Uploaded to someone else's server | Never leaves your Mac — the app only talks to `127.0.0.1` |
 | **Layout** | Plain text, or a re-flowed copy | Translation written back **into the original boxes**: figures, vector art, formulas and tables stay put |
@@ -56,20 +58,20 @@
 | **Scanned pages** | Often unsupported | On-device OCR with Apple Vision |
 
 > [!NOTE]
-> LocalTranslator uses **Hy-MT2-30B-A3B**, an open translation model by Tencent, served by [LM Studio](https://lmstudio.ai). The model runs entirely on your machine; the first translation loads it automatically and it is unloaded after 15 idle minutes.
+> Calque uses **Hy-MT2-30B-A3B**, an open translation model by Tencent, served by [LM Studio](https://lmstudio.ai). The model runs entirely on your machine; the first translation loads it automatically and it is unloaded after 15 idle minutes.
 
 ## What it looks like
 
-**Bilingual output** — the translation is written into the same positions as the original text. Figures, the formula and the two-column layout are untouched:
+**Bilingual output** — the translation is written into the same positions as the original text. Figures, equations and the two-column layout are untouched:
 
-<p align="center"><img src="assets/bilingual.png" alt="Original English page next to the translated Chinese page" width="100%"></p>
+<p align="center"><img src="assets/bilingual.png" alt="Original English page next to the translated Chinese page" width="100%"><br><sub>Example pages: <i>Tactile Gym 2.0</i> by Y. Lin, J. Lloyd, A. Church and N. F. Lepora (<a href="https://arxiv.org/abs/2207.10763">arXiv:2207.10763</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>), machine-translated by Calque.</sub></p>
 
 **The app** — a small local web UI. Light and dark follow your system:
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/ui-dark.png">
-    <img src="assets/ui-light.png" alt="LocalTranslator interface with one finished and one running task" width="88%">
+    <img src="assets/ui-light.png" alt="Calque interface with one finished and one running task" width="88%">
   </picture>
 </p>
 
@@ -154,8 +156,8 @@ Drop several files at once — they queue up and run one after another.
 **1 · Get the code**
 
 ```bash
-git clone https://github.com/zjywlive/LocalTranslator.git
-cd LocalTranslator
+git clone https://github.com/zjywlive/Calque.git
+cd Calque
 ```
 
 **2 · Install the one Python dependency** ([PyMuPDF](https://pymupdf.readthedocs.io))
@@ -171,7 +173,7 @@ Open LM Studio, search for **`tencent/Hy-MT2-30B-A3B-GGUF`** and download `Hy-MT
 **4 · Launch**
 
 ```bash
-./build_app.sh          # creates ~/Applications/本地翻译.app — double-click it from now on
+./build_app.sh          # creates ~/Applications/镜译.app — double-click it from now on
 ```
 
 Or run it directly:
@@ -183,16 +185,16 @@ Or run it directly:
 Your browser opens `http://127.0.0.1:8765`. Drop a file in. That's it.
 
 <details>
-<summary><b>Try it on the bundled sample</b></summary>
+<summary><b>Try it on the bundled example paper</b></summary>
 <br>
 
-`examples/sample-paper.pdf` is a two-page, two-column paper written for this project (no copyrighted content). Translate it from the command line:
+`examples/tactile-gym-2.pdf` is an open-access robotics paper (Lin et al., *Tactile Gym 2.0*, arXiv:2207.10763), redistributed unchanged under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Translate it from the command line:
 
 ```bash
-/usr/bin/python3 -E cli.py examples/sample-paper.pdf --to zh --mode dual --out examples/out
+/usr/bin/python3 -E cli.py examples/tactile-gym-2.pdf --to zh --mode dual --out examples/out
 ```
 
-You get `examples/out/sample-paper.zh-dual.pdf` and `examples/out/sample-paper.zh.pdf`. The images in this README were made from exactly these files.
+You get `examples/out/tactile-gym-2.zh-dual.pdf` and `examples/out/tactile-gym-2.zh.pdf`. The images in this README were made from exactly this run.
 
 </details>
 
@@ -276,7 +278,7 @@ Settings live in `~/Library/Application Support/LocalTranslator/config.json` (cr
 | `context` | `8192` | Context length used when loading |
 | `ttl` | `900` | Seconds of idle time before LM Studio unloads the model |
 | `target` / `mode` / `ocr` | `zh` / `dual` / `auto` | Defaults shown in the UI |
-| `output_dir` | `~/Documents/本地翻译` | Where results are written |
+| `output_dir` | `~/Documents/镜译` | Where results are written |
 | `ocr_languages` | en, zh-Hans, zh-Hant, ja, ko, fr, de, es | Languages Apple Vision looks for |
 | `glossaries` | `["robotics.tsv"]` | Built-in glossaries from `glossary/` |
 | `keep_names` | `true` | Keep person names and titles untranslated |
@@ -343,14 +345,15 @@ Save them as <code>.pptx</code> / <code>.xlsx</code> in PowerPoint or Excel firs
 - [Hy-MT2](https://huggingface.co/tencent/Hy-MT2-30B-A3B-GGUF) by Tencent — the translation model (Apache-2.0; downloaded separately, not distributed here)
 - [LM Studio](https://lmstudio.ai) — local model server
 - Apple Vision — on-device OCR
+- Example document: *Tactile Gym 2.0* by Yijiong Lin, John Lloyd, Alex Church and Nathan F. Lepora ([arXiv:2207.10763](https://arxiv.org/abs/2207.10763)), used under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The translated pages are machine output from Calque and are not endorsed by the authors.
 
-LocalTranslator is released under the **[GNU AGPL-3.0](LICENSE)**, matching PyMuPDF's license.
+Calque is released under the **[GNU AGPL-3.0](LICENSE)**, matching PyMuPDF's license.
 
 <div align="center">
 <br>
 
-[![Star History Chart](https://api.star-history.com/svg?repos=zjywlive/LocalTranslator&type=Date)](https://star-history.com/#zjywlive/LocalTranslator&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=zjywlive/Calque&type=Date)](https://star-history.com/#zjywlive/Calque&Date)
 
-<sub>If LocalTranslator saves you time, a ⭐ helps others find it. <a href="#contents">Back to top ↑</a></sub>
+<sub>If Calque saves you time, a ⭐ helps others find it. <a href="#contents">Back to top ↑</a></sub>
 
 </div>

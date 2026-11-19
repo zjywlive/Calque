@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LocalTranslator command line.
+"""Calque (镜译) command line.
 
     python3 -E cli.py FILE [FILE ...] [--to zh] [--mode dual|mono] [--out DIR] [--ocr auto|force|off]
 """
@@ -15,7 +15,7 @@ from localtr.engine import Engine, EngineError  # noqa: E402
 
 def main():
     cfg = config.load()
-    ap = argparse.ArgumentParser(description="本地文档翻译（LM Studio + Hy-MT2，纯本地）")
+    ap = argparse.ArgumentParser(description="镜译 Calque：本地文档翻译（LM Studio + Hy-MT2，纯本地）")
     ap.add_argument("files", nargs="+")
     ap.add_argument("--to", default=cfg["target"], choices=sorted(config.LANGS))
     ap.add_argument("--mode", default=cfg["mode"], choices=["dual", "mono"])

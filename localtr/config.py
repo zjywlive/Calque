@@ -1,4 +1,6 @@
-"""Settings, paths and language table for LocalTranslator."""
+"""Settings, paths and language table for Calque (镜译).
+
+The support/cache/log folders keep the original "LocalTranslator" name so existing settings carry over."""
 import json
 import os
 
@@ -20,7 +22,7 @@ DEFAULTS = {
     "target": "zh",
     "mode": "dual",                     # dual = bilingual, mono = translation only
     "ocr": "auto",                      # PDF OCR: auto (scanned pages only) / force / off
-    "output_dir": os.path.expanduser("~/Documents/本地翻译"),
+    "output_dir": os.path.expanduser("~/Documents/镜译"),
     "ocr_languages": ["en-US", "zh-Hans", "zh-Hant", "ja-JP", "ko-KR", "fr-FR", "de-DE", "es-ES"],
     "glossaries": ["robotics.tsv"],     # files in <app>/glossary, plus the user glossary
     "keep_names": True,                 # keep personal names / quoted titles in the source language

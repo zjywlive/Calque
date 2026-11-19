@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LocalTranslator — local web UI (listens on 127.0.0.1 only).
+"""Calque (镜译) — local web UI (listens on 127.0.0.1 only).
 
     python3 -E app.py --open      start (or reuse) the server and open the browser
 """
@@ -273,7 +273,7 @@ def main():
     threading.Thread(target=worker, daemon=True).start()
     url = f"http://127.0.0.1:{port}"
     log_file(f"server started at {url}")
-    print("LocalTranslator running at", url, flush=True)
+    print("Calque running at", url, flush=True)
     if a.open:
         threading.Timer(0.5, lambda: webbrowser.open(url)).start()
     try:

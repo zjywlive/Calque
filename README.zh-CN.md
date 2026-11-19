@@ -1,9 +1,9 @@
 <div align="center">
 
-<a href="https://zjywlive.github.io/LocalTranslator/">
+<a href="https://zjywlive.github.io/Calque/">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
-    <img alt="LocalTranslator 本地翻译：保留排版的文档翻译，完全离线" src="assets/hero-light.svg" width="100%">
+    <img alt="Calque 镜译：保留排版的文档翻译，完全离线" src="assets/hero-light.svg" width="100%">
   </picture>
 </a>
 
@@ -13,12 +13,12 @@
   <img alt="Python 3.9+" src="https://img.shields.io/badge/python-3.9%2B-3776ab?style=flat-square&logo=python&logoColor=white">
   <img alt="完全离线" src="https://img.shields.io/badge/%E7%BD%91%E7%BB%9C-%E4%BB%85%20127.0.0.1-1f9d55?style=flat-square">
   <img alt="不需要 API Key" src="https://img.shields.io/badge/API%20Key-%E4%B8%8D%E9%9C%80%E8%A6%81-5d6577?style=flat-square">
-  <a href="https://github.com/zjywlive/LocalTranslator/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/zjywlive/LocalTranslator?style=flat-square&color=f0b429"></a>
+  <a href="https://github.com/zjywlive/Calque/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/zjywlive/Calque?style=flat-square&color=f0b429"></a>
 </p>
 
 <p>
   <a href="README.md">English</a> · <b>简体中文</b> ·
-  <a href="https://zjywlive.github.io/LocalTranslator/">项目主页与在线演示</a> ·
+  <a href="https://zjywlive.github.io/Calque/">项目主页与在线演示</a> ·
   <a href="#快速开始">快速开始</a> ·
   <a href="#常见问题">常见问题</a>
 </p>
@@ -26,6 +26,8 @@
 <h3>拖进一篇英文 PDF，拿回排版不变的中文版，还能和原文左右对照。<br>不上云、不注册、不需要 API Key。</h3>
 
 <img src="assets/demo.gif" alt="拖入论文后实时翻译的过程" width="88%">
+
+<sub><b>镜译</b>：左右两页像镜子一样一一对应。英文名 <b>Calque</b> 是语言学里的「仿译」，在法语里是「描摹」的意思：翻译文字，描下版面。</sub>
 
 </div>
 
@@ -47,7 +49,7 @@
 
 ## 为什么做这个
 
-| | 在线翻译服务 | LocalTranslator |
+| | 在线翻译服务 | Calque |
 |---|---|---|
 | **文件去哪了** | 上传到别人的服务器 | 不离开你的 Mac，程序只访问 `127.0.0.1` |
 | **排版** | 纯文本，或重新排过的版本 | 译文**写回原文的位置**，图片、矢量图、公式、表格都不动 |
@@ -62,14 +64,14 @@
 
 **双语对照输出**：译文写在原文的同一位置，图片、公式和双栏版式都保持原样。
 
-<p align="center"><img src="assets/bilingual.png" alt="英文原页与中文译页左右对照" width="100%"></p>
+<p align="center"><img src="assets/bilingual.png" alt="英文原页与中文译页左右对照" width="100%"><br><sub>示例页面：Y. Lin、J. Lloyd、A. Church、N. F. Lepora 的论文 <i>Tactile Gym 2.0</i>（<a href="https://arxiv.org/abs/2207.10763">arXiv:2207.10763</a>，<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>），由 Calque 机器翻译。</sub></p>
 
 **软件界面**：一个本地网页界面，深浅色跟随系统。
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/ui-dark.png">
-    <img src="assets/ui-light.png" alt="本地翻译界面：一个任务已完成，一个正在翻译" width="88%">
+    <img src="assets/ui-light.png" alt="镜译界面：一个任务已完成，一个正在翻译" width="88%">
   </picture>
 </p>
 
@@ -154,8 +156,8 @@
 **1 · 下载代码**
 
 ```bash
-git clone https://github.com/zjywlive/LocalTranslator.git
-cd LocalTranslator
+git clone https://github.com/zjywlive/Calque.git
+cd Calque
 ```
 
 **2 · 安装唯一的 Python 依赖** [PyMuPDF](https://pymupdf.readthedocs.io)
@@ -171,7 +173,7 @@ cd LocalTranslator
 **4 · 启动**
 
 ```bash
-./build_app.sh          # 生成 ~/Applications/本地翻译.app，以后双击它就能打开
+./build_app.sh          # 生成 ~/Applications/镜译.app，以后双击它就能打开
 ```
 
 也可以直接运行：
@@ -183,16 +185,16 @@ cd LocalTranslator
 浏览器会打开 `http://127.0.0.1:8765`，把文件拖进去就行。
 
 <details>
-<summary><b>用自带的示例试一下</b></summary>
+<summary><b>用自带的示例论文试一下</b></summary>
 <br>
 
-`examples/sample-paper.pdf` 是为本项目写的一篇两页双栏小论文，不含任何受版权保护的内容。用命令行翻译它：
+`examples/tactile-gym-2.pdf` 是一篇开放获取的机器人学论文（Lin 等，*Tactile Gym 2.0*，arXiv:2207.10763），按 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) 许可原样分发。用命令行翻译它：
 
 ```bash
-/usr/bin/python3 -E cli.py examples/sample-paper.pdf --to zh --mode dual --out examples/out
+/usr/bin/python3 -E cli.py examples/tactile-gym-2.pdf --to zh --mode dual --out examples/out
 ```
 
-会得到 `examples/out/sample-paper.zh-dual.pdf` 和 `examples/out/sample-paper.zh.pdf`。本页的效果图就是用这两个文件做的。
+会得到 `examples/out/tactile-gym-2.zh-dual.pdf` 和 `examples/out/tactile-gym-2.zh.pdf`。本页的效果图就是用这次运行的结果做的。
 
 </details>
 
@@ -274,7 +276,7 @@ flowchart LR
 | `context` | `8192` | 加载时的上下文长度 |
 | `ttl` | `900` | 闲置多少秒后 LM Studio 自动卸载模型 |
 | `target` / `mode` / `ocr` | `zh` / `dual` / `auto` | 界面上的默认值 |
-| `output_dir` | `~/Documents/本地翻译` | 译文保存位置 |
+| `output_dir` | `~/Documents/镜译` | 译文保存位置 |
 | `ocr_languages` | 英、简中、繁中、日、韩、法、德、西 | Apple Vision 识别的语言 |
 | `glossaries` | `["robotics.tsv"]` | `glossary/` 下启用的内置术语表 |
 | `keep_names` | `true` | 人名和书名保留原文 |
@@ -341,13 +343,14 @@ flowchart LR
 - 腾讯 [Hy-MT2](https://huggingface.co/tencent/Hy-MT2-30B-A3B-GGUF)：翻译模型（Apache-2.0，需另行下载，本仓库不分发）
 - [LM Studio](https://lmstudio.ai)：本地模型服务
 - Apple Vision：本机文字识别
+- 示例文档：Yijiong Lin、John Lloyd、Alex Church、Nathan F. Lepora 的论文 *Tactile Gym 2.0*（[arXiv:2207.10763](https://arxiv.org/abs/2207.10763)），按 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) 使用。译文页面由 Calque 机器翻译，不代表原作者。
 
-LocalTranslator 以 **[GNU AGPL-3.0](LICENSE)** 许可证发布，与 PyMuPDF 保持一致。
+Calque 以 **[GNU AGPL-3.0](LICENSE)** 许可证发布，与 PyMuPDF 保持一致。
 
 <div align="center">
 <br>
 
-[![Star History Chart](https://api.star-history.com/svg?repos=zjywlive/LocalTranslator&type=Date)](https://star-history.com/#zjywlive/LocalTranslator&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=zjywlive/Calque&type=Date)](https://star-history.com/#zjywlive/Calque&Date)
 
 <sub>如果它帮你省了时间，点个 ⭐ 能让更多人看到。<a href="#目录">回到顶部 ↑</a></sub>
 

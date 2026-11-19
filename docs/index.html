@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LocalTranslator: translate documents offline, keep the layout</title>
+<title>Calque: translate documents offline, keep the layout</title>
 <meta name="description" content="Offline, layout-preserving document translation for macOS. PDF, Word, PowerPoint, Excel, EPUB, subtitles and scanned pages, translated by a local model. Your files never leave your Mac.">
-<meta property="og:title" content="LocalTranslator: translate the document, keep the page">
+<meta property="og:title" content="Calque: translate the document, keep the page">
 <meta property="og:description" content="Offline, layout-preserving document translation for macOS. Bilingual side-by-side PDFs, on-device OCR, no API key.">
-<meta property="og:image" content="https://zjywlive.github.io/LocalTranslator/assets/bilingual.png">
+<meta property="og:image" content="https://zjywlive.github.io/Calque/assets/bilingual.png">
 <meta name="theme-color" content="#eef0f3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -62,7 +62,7 @@ p{margin:0}
 .hero .acts{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
 .facts{display:flex;gap:10px 20px;flex-wrap:wrap;font-size:16px;color:var(--muted)}
 .stage{grid-column:7/13}
-.compare{position:relative;aspect-ratio:910/900;background:#fff;border-radius:var(--r);overflow:hidden;user-select:none;touch-action:pan-y;cursor:ew-resize}
+.compare{position:relative;aspect-ratio:935/1210;width:min(100%,calc(66svh * 935 / 1210));margin-left:auto;background:#fff;border-radius:var(--r);overflow:hidden;user-select:none;touch-action:pan-y;cursor:ew-resize}
 .compare img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
 .compare .tr{transition:opacity 1.6s ease}
 .compare .tr[hidden]{display:block;opacity:0}
@@ -74,6 +74,11 @@ p{margin:0}
 .compare input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
 .stage-foot{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:16px}
 .stage-foot p{font-size:16px;color:var(--muted)}
+.stage-foot .credit{font-size:14px}
+.stage-foot{flex-wrap:nowrap;align-items:flex-start}
+.stage-foot p{flex:1;min-width:0}
+.stage-foot .seg{flex:none}
+@media (max-width:900px){.stage-foot{flex-wrap:wrap}}
 
 /* showcase */
 .show{background:var(--dark);color:var(--dark-ink);padding-block:120px 96px;margin-top:80px}
@@ -113,10 +118,10 @@ p{margin:0}
 .sheet{width:min(560px,100%);background:#fff;color:#111;border-radius:6px;padding:40px 36px;font-family:"Times New Roman",Times,"Songti SC",serif;transition:opacity .35s}
 .sheet.dual{width:min(720px,100%);display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .sheet .col{min-width:0}
-.sheet h4{font-size:22px;line-height:1.25;margin:0 0 6px;text-align:center}
+.sheet .tt{font-size:22px;line-height:1.25;margin:0 0 6px;text-align:center;font-weight:700}
 .sheet .au{font-size:13px;text-align:center;margin-bottom:12px}
 .sheet .ab{font-size:14.5px;line-height:1.55;text-align:justify}
-.sheet .eq{font-style:italic;text-align:center;font-size:16px;margin:12px 0;padding:4px;border-radius:3px;transition:background-color .3s,outline-color .3s;outline:2px solid transparent}
+.sheet .eq{font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:12.5px!important;text-align:center;font-size:16px;margin:12px 0;padding:4px;border-radius:3px;transition:background-color .3s,outline-color .3s;outline:2px solid transparent}
 .sheet.keep .eq{background:#fff3c4;outline-color:#e0b100}
 .sheet mark{background:transparent;transition:background-color .3s}
 .sheet.terms mark{background:#d7dcff}
@@ -208,6 +213,9 @@ footer{padding-top:22svh}
   .feat-copy{display:contents}
   .feat-copy h2{order:0;padding-top:48px}
   .feat-out{order:1;margin-bottom:48px!important}
+  .sheet{padding:24px 20px}
+  .sheet .tt{font-size:16px}
+  .sheet .ab{font-size:13.5px}
   .blk{order:2}
   .call:has(.copy){padding:56px 20px 20px}
   .feat-out{position:relative;height:auto;min-height:0;margin:0 calc(-1 * var(--m));padding:24px 16px;align-items:start}
@@ -234,11 +242,11 @@ footer{padding-top:22svh}
 <body>
 <div class="wrap">
   <header class="top">
-    <a class="mark" href="#top" aria-label="LocalTranslator home"><i>译</i>LocalTranslator</a>
+    <a class="mark" href="#top" aria-label="Calque home"><i>镜</i>Calque</a>
     <nav aria-label="Main">
       <a class="hide-s" href="#how" data-i="nav_how">How it works</a>
       <a class="hide-s" href="#formats" data-i="nav_formats">Formats</a>
-      <a href="https://github.com/zjywlive/LocalTranslator">GitHub</a>
+      <a href="https://github.com/zjywlive/Calque">GitHub</a>
       <button class="langbtn" id="lang" type="button" aria-label="切换到中文">中文</button>
     </nav>
   </header>
@@ -249,23 +257,23 @@ footer{padding-top:22svh}
       <h1 id="h1" class="rise" data-i="h1">Translate it. Keep the page.</h1>
       <p class="lead rise" data-i="lead">An offline Mac app that writes the translation back into the original layout, side by side with the source. A local model does the work; your files never leave your Mac.</p>
       <div class="acts rise">
-        <a class="btn" href="https://github.com/zjywlive/LocalTranslator#quick-start" data-i="cta1">Get it on GitHub</a>
+        <a class="btn" href="https://github.com/zjywlive/Calque#quick-start" data-i="cta1">Get it on GitHub</a>
         <a class="textlink" href="#how"><b data-i="cta2">See how it works</b> <span aria-hidden="true">→</span></a>
       </div>
       <p class="facts rise"><span data-i="f1">Free and open source</span><span data-i="f2">macOS on Apple Silicon</span><span data-i="f3">No API key</span></p>
     </div>
     <div class="stage rise">
       <div class="compare" id="compare" data-ui style="--x:50%;padding:0;border-radius:var(--r)">
-        <img class="tr" data-lang="zh" src="assets/page-zh.png" width="910" height="900" alt="Page 1 of the sample paper translated into Chinese, same layout">
-        <img class="tr" data-lang="ja" src="assets/page-ja.png" width="910" height="900" alt="The same page translated into Japanese" hidden>
-        <img class="tr" data-lang="fr" src="assets/page-fr.png" width="910" height="900" alt="The same page translated into French" hidden>
-        <img class="orig" src="assets/page-en.png" width="910" height="900" alt="Page 1 of the English original">
+        <img class="tr" data-lang="zh" src="assets/page-zh.png" width="935" height="1210" alt="Page 1 of Tactile Gym 2.0 translated into Chinese, same layout">
+        <img class="tr" data-lang="ja" src="assets/page-ja.png" width="935" height="1210" alt="The same page translated into Japanese" hidden>
+        <img class="tr" data-lang="fr" src="assets/page-fr.png" width="935" height="1210" alt="The same page translated into French" hidden>
+        <img class="orig" src="assets/page-en.png" width="935" height="1210" alt="Page 1 of Tactile Gym 2.0, English original">
         <span class="tag l">English</span><span class="tag r" id="tagR">中文</span>
         <div class="handle"><span class="knob" aria-hidden="true">⇆</span></div>
         <input type="range" min="0" max="100" value="50" id="slider" aria-label="Drag to compare the original and the translation">
       </div>
       <div class="stage-foot">
-        <p data-i="drag">Drag across the page. Real output, unedited.</p>
+        <p><span data-i="drag">Drag across the page. Real output, unedited.</span><br><small class="credit"><span data-i="credit">Example: Tactile Gym 2.0 by Lin, Lloyd, Church and Lepora,</span> <a href="https://arxiv.org/abs/2207.10763">arXiv:2207.10763</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</small></p>
         <div class="seg" role="group" aria-label="Translation language" id="langs">
           <button type="button" data-l="zh" aria-pressed="true">中文</button>
           <button type="button" data-l="ja" aria-pressed="false">日本語</button>
@@ -283,9 +291,9 @@ footer{padding-top:22svh}
     <div class="now" aria-live="polite"><b id="nowName">The app</b><p id="nowText">Drop files in, watch each one translate, open the result. The window is a local web page on 127.0.0.1.</p></div>
   </div>
   <div class="row" id="row" tabindex="0" aria-label="Product views, scroll sideways">
-    <figure class="panel" style="margin:0" data-k="p1"><img src="assets/ui-light.png" width="2000" height="1440" alt="The LocalTranslator window with a finished and a running task" loading="lazy"></figure>
+    <figure class="panel" style="margin:0" data-k="p1"><img src="assets/ui-light.png" width="2000" height="1440" alt="The Calque window with a finished and a running task" loading="lazy"></figure>
     <figure class="panel" style="margin:0" data-k="p2"><img src="assets/demo.gif" width="800" height="576" alt="A paper translating from 0 to 100 percent" loading="lazy"></figure>
-    <figure class="panel" style="margin:0" data-k="p3"><img src="assets/bilingual.png" width="1819" height="900" alt="Bilingual PDF, original left and translation right" loading="lazy"></figure>
+    <figure class="panel" style="margin:0" data-k="p3"><img src="assets/bilingual.png" width="1870" height="1210" alt="Bilingual PDF, original left and translation right" loading="lazy"></figure>
     <figure class="panel" style="margin:0" data-k="p4">
       <div data-ui>
         <div class="uirow"><span class="uidot"></span><span class="uiname">模型已加载</span><span class="uimeta">hy-mt2-30b-a3b · 占用约 32.0 GB 内存</span><span style="flex:1"></span><button class="uibtn d" type="button" tabindex="-1">卸载模型</button></div>
@@ -324,7 +332,7 @@ footer{padding-top:22svh}
       <h2 id="feat-h" class="rise" data-i="feat_h">Set it up your way.</h2>
       <div class="blk rise">
         <h3 data-i="b1h">Fourteen target languages.</h3>
-        <p data-i="b1p">Chinese, Japanese, French and eleven more. The sheet on the left is this tool's real output for the sample paper.</p>
+        <p data-i="b1p">Chinese, Japanese, French and eleven more. The sheet on the left is real output: page 1 of Tactile Gym 2.0 (CC BY 4.0).</p>
         <div class="seg" role="group" aria-label="Language" id="fLang">
           <button type="button" data-v="zh" aria-pressed="true">中文</button><button type="button" data-v="ja" aria-pressed="false">日本語</button><button type="button" data-v="fr" aria-pressed="false">Français</button>
         </div>
@@ -337,8 +345,8 @@ footer{padding-top:22svh}
         </div>
       </div>
       <div class="blk rise">
-        <h3 data-i="b3h">Formulas are left alone.</h3>
-        <p data-i="b3p">Math, figures, table bodies and reference lists stay exactly as they were. Turn this on to see what was kept.</p>
+        <h3 data-i="b3h">Figures and formulas stay put.</h3>
+        <p data-i="b3p">Figure labels, math, table bodies and reference lists stay exactly as they were. Turn this on to see what was kept.</p>
         <div class="seg" role="group" aria-label="Show preserved parts" id="fKeep">
           <button type="button" data-v="off" aria-pressed="true" data-i="off">Off</button><button type="button" data-v="on" aria-pressed="false" data-i="on">Show what was kept</button>
         </div>
@@ -358,8 +366,8 @@ footer{padding-top:22svh}
       <h2 id="how-h" class="rise" data-i="how_h">Running in five minutes.</h2>
       <div class="ex rise">
         <p data-i="s1">First, get the code and its one dependency.</p>
-        <div class="call"><pre><code id="c1">git clone https://github.com/zjywlive/LocalTranslator.git
-cd LocalTranslator
+        <div class="call"><pre><code id="c1">git clone https://github.com/zjywlive/Calque.git
+cd Calque
 /usr/bin/python3 -m pip install --user pymupdf</code></pre><button class="copy" type="button" data-copy="c1" data-i="copy">Copy</button></div>
         <div class="resp" data-ui><span class="uimeta">Successfully installed PyMuPDF-1.26.5</span></div>
       </div>
@@ -373,8 +381,8 @@ cd LocalTranslator
       </div>
       <div class="ex rise">
         <p data-i="s3">Finally, launch it and drop a file in.</p>
-        <div class="call"><pre><code id="c3">./build_app.sh   # creates ~/Applications/本地翻译.app</code></pre><button class="copy" type="button" data-copy="c3" data-i="copy">Copy</button></div>
-        <div class="resp wide"><img src="assets/bilingual.png" width="1819" height="900" alt="The finished bilingual PDF" loading="lazy"></div>
+        <div class="call"><pre><code id="c3">./build_app.sh   # creates ~/Applications/镜译.app</code></pre><button class="copy" type="button" data-copy="c3" data-i="copy">Copy</button></div>
+        <div class="resp wide"><img src="assets/bilingual.png" width="1870" height="1210" alt="The finished bilingual PDF" loading="lazy"></div>
       </div>
     </div>
   </section>
@@ -382,7 +390,7 @@ cd LocalTranslator
   <section class="fmt" id="formats" aria-labelledby="fmt-h">
     <div class="fmt-head">
       <h2 id="fmt-h" class="rise"><span data-i="fmt_h1">Not only PDFs.</span><span style="color:inherit" data-i="fmt_h2">Twenty-four file types.</span></h2>
-      <a class="btn rise" href="https://github.com/zjywlive/LocalTranslator#supported-formats" data-i="fmt_btn">Full format table</a>
+      <a class="btn rise" href="https://github.com/zjywlive/Calque#supported-formats" data-i="fmt_btn">Full format table</a>
     </div>
     <div class="fmt-body">
       <div class="tabs" role="tablist" aria-label="Format groups" id="tabs"></div>
@@ -402,7 +410,7 @@ cd LocalTranslator
   <div class="wrap cta-in">
     <h2 id="cta-h" class="rise" data-i="cta_h">Your next paper stays on your Mac.</h2>
     <div class="side rise">
-      <a class="btn" href="https://github.com/zjywlive/LocalTranslator" data-i="cta_btn">Get LocalTranslator</a>
+      <a class="btn" href="https://github.com/zjywlive/Calque" data-i="cta_btn">Get Calque</a>
       <p data-i="cta_p">Free and open source under AGPL-3.0. Star it if it saves you an afternoon.</p>
     </div>
   </div>
@@ -411,7 +419,7 @@ cd LocalTranslator
 <footer class="wrap">
   <div class="foot">
     <span data-i="foot">Offline document translation for macOS</span>
-    <span class="links"><a href="https://github.com/zjywlive/LocalTranslator">GitHub</a><a href="https://github.com/zjywlive/LocalTranslator/blob/main/README.zh-CN.md">中文 README</a><a href="https://github.com/zjywlive/LocalTranslator/blob/main/LICENSE">AGPL-3.0</a></span>
+    <span class="links"><a href="https://github.com/zjywlive/Calque">GitHub</a><a href="https://github.com/zjywlive/Calque/blob/main/README.zh-CN.md">中文 README</a><a href="https://github.com/zjywlive/Calque/blob/main/LICENSE">AGPL-3.0</a></span>
     <span class="yr">2026</span>
   </div>
 </footer>
@@ -426,16 +434,16 @@ const ZH = {
   nav_how:'工作原理', nav_formats:'支持格式', h1:'翻译文档，保留版面。',
   lead:'一个离线的 Mac 应用：把译文写回原文的位置，还能和原文左右对照。翻译由本机模型完成，文件不离开你的电脑。',
   cta1:'在 GitHub 获取', cta2:'看看怎么用', f1:'免费开源', f2:'Apple Silicon 的 Mac', f3:'不需要 API Key',
-  drag:'在页面上左右拖动。真实输出，没有修饰。', show_h:'所有事情都在这台电脑上完成。',
-  feat_h:'按你的需要设置。', b1h:'十四种目标语言。', b1p:'中文、日语、法语等十四种。左边这页就是本工具对示例论文的真实输出。',
+  drag:'在页面上左右拖动。真实输出，没有修饰。', credit:'示例：Lin、Lloyd、Church、Lepora 的论文 Tactile Gym 2.0，', show_h:'所有事情都在这台电脑上完成。',
+  feat_h:'按你的需要设置。', b1h:'十四种目标语言。', b1p:'中文、日语、法语等十四种。左边是真实输出：Tactile Gym 2.0 第 1 页（CC BY 4.0）。',
   b2h:'双语对照，或只要译文。', b2p:'双语对照把原文放在译文旁边，任何一句都能核对。每个 PDF 都会同时生成两种文件。',
-  b3h:'公式原样保留。', b3p:'数学公式、图片、表格内容和参考文献都保持原样。打开开关，看看哪些被保留了。',
+  b3h:'图和公式原样保留。', b3p:'图里的标注、数学公式、表格内容和参考文献都保持原样。打开开关，看看哪些被保留了。',
   b4h:'术语始终一致。', b4p:'术语表固定关键词的译法，每一段、每个文件都一样。在左边高亮看看。',
   mono:'仅译文', dual:'双语对照', off:'关', on:'显示保留部分', hl:'高亮术语',
   how_h:'五分钟跑起来。', s1:'第一步，下载代码并安装唯一的依赖。', s2:'然后在 LM Studio 里下载模型。', s3:'最后，启动它，把文件拖进去。',
   copy:'复制', copied:'已复制', q4:'约 19 GB · 32 GB 内存的 Mac 可用',
   fmt_h1:'不只是 PDF。', fmt_h2:'二十四种文件格式。', fmt_btn:'完整格式表',
-  faq_h:'常见问题', cta_h:'下一篇论文，不用离开你的 Mac。', cta_btn:'获取 LocalTranslator', cta_p:'免费开源，AGPL-3.0 许可证。如果帮你省了一个下午，点个 Star。',
+  faq_h:'常见问题', cta_h:'下一篇论文，不用离开你的 Mac。', cta_btn:'获取 Calque', cta_p:'免费开源，AGPL-3.0 许可证。如果帮你省了一个下午，点个 Star。',
   foot:'macOS 离线文档翻译'
 };
 const EN = {}; $$('[data-i]').forEach(el => EN[el.dataset.i] = el.textContent);
@@ -488,12 +496,7 @@ const FAQ = {
        ['支持 Intel Mac、Windows、Linux 吗？','暂时不支持。文字识别依赖 Apple Vision，启动方式也是 macOS 专用的。翻译核心是纯 Python，欢迎移植。'],
        ['速度怎么样？','模型加载后，在 M 系列 Mac 上翻一篇两页的论文不到一分钟。每段译文都会缓存，重跑立刻完成。']]
 };
-const SHEET = {
-  en: {title:'Seeing Touch: A Short Primer on Optical Tactile Sensors', au:'A. Example and B. Sample — Example Robotics Lab', ab:'Abstract—Optical tactile sensors turn contact into images. A soft skin deforms against an object, an internal camera records the deformation, and image processing recovers contact location, force and local shape.', term:'tactile sensors'},
-  zh: {title:'《感知触摸：光学触觉传感器入门指南》', au:'A. 示例与B. 样本——示例机器人实验室', ab:'摘要—光学触觉传感器能够将接触过程转化为图像。当柔软的表层与物体接触时会发生变形，内部的摄像头则记录下这种变形情况；随后通过图像处理便可确定接触位置、作用力以及物体的局部形状。', term:'触觉传感器'},
-  ja: {title:'触覚の可視化：光学的触覚センサー入門', au:'A. 例とB. サンプル — エグザンプル・ロボティクス・ラボ', ab:'要約—光学的触覚センサは、接触を画像に変換する。柔らかい皮膚が物体に接触して変形し、内部のカメラがその変形を記録し、画像処理によって接触位置、力、局所的な形状が復元される。', term:'触覚センサ'},
-  fr: {title:'Voir au toucher : Un bref guide sur les capteurs tactiles optiques', au:'A. Exemple et B. Échantillon — Laboratoire de robotique Example', ab:'Résumé—Les capteurs tactiles optiques transforment le contact en images. Une peau souple se déforme au contact d’un objet ; une caméra interne enregistre cette déformation, et le traitement d’image permet de déterminer l’emplacement du contact, la force exercée et la forme locale de l’objet.', term:'capteurs tactiles'}
-};
+const SHEET = {"en": {"title": "Tactile Gym 2.0: Sim-to-real Deep Reinforcement Learning for Comparing Low-cost High-Resolution Robot Touch", "au": "Yijiong Lin1, John Lloyd1, Alex Church1, Nathan F. Lepora1", "ab": "Abstract—High-resolution optical tactile sensors are increasingly used in robotic learning environments due to their ability to capture large amounts of data directly relating to agent-environment interaction. However, there is a high barrier of entry to research in this area due to the high cost of tactile robot platforms, specialised simulation software, and sim-to-real methods that lack generality across different sensors.", "term": "optical tactile sensors"}, "zh": {"title": "触觉训练场2.0：用于比较低成本高分辨率机器人触觉传感器的仿真到现实强化学习系统", "au": "林一炯1，John Lloyd1，Alex Church1，Nathan F. Lepora1", "ab": "摘要—高分辨率光学触觉传感器因能够采集大量与机器人‐环境交互相关的数据，正被日益广泛地应用于机器人学习领域。然而，由于触觉机器人平台成本高昂、专用仿真软件稀缺，以及现有仿真到现实转换方法难以适用于不同类型的传感器，该领域的研究门槛较高。", "term": "光学触觉传感器"}, "ja": {"title": "タクタイル・ジム2.0：低コストかつ高解像度なロボット触覚を比較するためのシムツートゥリアル深層強化学習", "au": "林一炯1、John Lloyd1、アレックス・チャーチ1、Nathan F. Lepora1", "ab": "要旨—高解像度の光学式触覚センサーは、エージェントと環境との相互作用に関する大量のデータを取得できるため、ロボット学習環境においてますます利用されるようになっている。しかしながら、触覚ロボットプラットフォームや専用のシミュレーションソフトウェアが高価であること、また様々なセンサーに汎用性を持たせることが難しいシム・ツー・リアル手法が存在することから、この分野における研究への参入障壁は非常に高い。", "term": "光学式触覚センサー"}, "fr": {"title": "Tactile Gym 2.0 : Apprentissage par renforcement profond simulation-réalité pour comparer des systèmes de toucher robotique à faible coût et haute résolution", "au": "Yijiong Lin1, John Lloyd1, Alex Church1, Nathan F. Lepora1", "ab": "Résumé—Les capteurs tactiles optiques à haute résolution sont de plus en plus utilisés dans les environnements d’apprentissage robotique, grâce à leur capacité à capturer une grande quantité de données directement liées à l’interaction entre l’agent et son environnement. Cependant, il existe un seuil d’entrée élevé pour la recherche dans ce domaine, en raison du coût important des plateformes robotiques tactiles, des logiciels de simulation spécialisés, ainsi que des méthodes de transfert simulation-réalité qui manquent de généralité entre différents capteurs.", "term": "capteurs tactiles optiques"}};
 const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
 /* ---------- hero compare (the live thing) ---------- */
@@ -532,7 +535,7 @@ setNow(panels[0]);
 /* ---------- features: the fixed output ---------- */
 const st = {lang: 'zh', mode: 'mono', keep: 'off', terms: 'off'};
 function hl(text, term){ const i = text.indexOf(term); return i < 0 ? esc(text) : esc(text.slice(0, i)) + '<mark>' + esc(term) + '</mark>' + esc(text.slice(i + term.length)); }
-function col(d, src){ return `<div class="col${src ? ' src' : ''}"><h4>${esc(d.title)}</h4><div class="au">${esc(d.au)}</div><p class="ab">${hl(d.ab, d.term)}</p><p class="eq">∇z = (−nₓ / n_z , −n_y / n_z)</p></div>`; }
+function col(d, src){ return `<div class="col${src ? ' src' : ''}"><div class="tt">${esc(d.title)}</div><div class="au">${esc(d.au)}</div><p class="ab">${hl(d.ab, d.term)}</p><p class="eq">(a) Optical Tactile Sensors · (b) Real-to-Sim Tactile Image Translation</p></div>`; }
 function renderSheet(){
   const s = $('#sheet'), d = SHEET[st.lang];
   s.className = 'sheet' + (st.mode === 'dual' ? ' dual' : '') + (st.keep === 'on' ? ' keep' : '') + (st.terms === 'on' ? ' terms' : '');
@@ -583,7 +586,7 @@ function applyLang(){
   $$('[data-i]').forEach(el => el.textContent = t(el.dataset.i));
   $('#lang').textContent = lang === 'zh' ? 'EN' : '中文';
   $('#lang').setAttribute('aria-label', lang === 'zh' ? 'Switch to English' : '切换到中文');
-  document.title = lang === 'zh' ? 'LocalTranslator 本地翻译：离线翻译文档，保留排版' : 'LocalTranslator: translate documents offline, keep the layout';
+  document.title = lang === 'zh' ? 'Calque 镜译：离线翻译文档，保留排版' : 'Calque: translate documents offline, keep the layout';
   renderFormats(); renderFaq();
   const on = panels.find(p => p.classList.contains('on')); if (on) setNow(on);
 }
