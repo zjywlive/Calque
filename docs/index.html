@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LocalTranslator: translate documents offline, keep the layout</title>
+<meta name="description" content="Offline, layout-preserving document translation for macOS. PDF, Word, PowerPoint, Excel, EPUB, subtitles and scanned pages, translated by a local model. Your files never leave your Mac.">
+<meta property="og:title" content="LocalTranslator: translate the document, keep the page">
+<meta property="og:description" content="Offline, layout-preserving document translation for macOS. Bilingual side-by-side PDFs, on-device OCR, no API key.">
+<meta property="og:image" content="https://zjywlive.github.io/LocalTranslator/assets/bilingual.png">
+<meta name="theme-color" content="#eef0f3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef0f3;--surface:#e2e5ea;--surface-2:#d6dae1;--ink:#0b0c0e;--muted:#5d6470;
+  --accent:#1f2de6;--accent-ink:#fff;--field:#1f2de6;--field-ink:#fff;--dark:#0f1115;--dark-2:#1a1d23;--dark-ink:#eceef2;--dark-muted:#a9afba;
+  --step-small:clamp(.8125rem,.79rem + .1vw,.875rem);--step-body:clamp(1.0625rem,1rem + .25vw,1.1875rem);
+  --step-lead:clamp(1.25rem,1.1rem + .7vw,1.625rem);--step-head:clamp(2rem,1.3rem + 3.2vw,4rem);
+  --m:clamp(20px,4vw,56px);--r:4px;--ease:cubic-bezier(.2,0,0,1);
+  font-family:"Albert Sans",-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-size:var(--step-body);line-height:1.5;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit}
+h1,h2,h3{font-weight:600;letter-spacing:-.035em;line-height:1.02;margin:0}
+html[lang^=zh] :is(h1,h2,h3){word-break:keep-all;letter-spacing:0;line-height:1.15}
+p{margin:0}
+.wrap{padding-inline:var(--m);max-width:1440px;margin-inline:auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 22px;border-radius:var(--r);border:0;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:500;text-decoration:none;cursor:pointer;transition:transform .15s var(--ease),background-color .15s}
+.btn:hover{background:#1622c4}
+.btn:active{transform:scale(.98)}
+.textlink{font-weight:500;text-decoration:none;display:inline-flex;gap:6px;align-items:center}
+.textlink span{transition:transform .2s var(--ease)}
+.textlink:hover span{transform:translateX(4px)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.seg{display:inline-flex;background:var(--surface);border-radius:var(--r);padding:4px;gap:4px;flex-wrap:wrap}
+.seg button{height:40px;padding:0 16px;border:0;border-radius:3px;background:transparent;color:var(--ink);font:inherit;font-size:16px;cursor:pointer;transition:background-color .15s,color .15s,transform .15s}
+.seg button:hover{background:var(--surface-2)}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.seg button:active{transform:scale(.97)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;padding-block:24px}
+.mark{display:flex;align-items:center;gap:10px;font-weight:600;font-size:18px;text-decoration:none;letter-spacing:-.01em}
+.mark i{width:26px;height:26px;border-radius:var(--r);background:var(--ink);display:grid;place-items:center;color:#fff;font-style:normal;font-size:14px}
+.top nav{display:flex;gap:22px;align-items:center;font-size:16px}
+.top nav a{text-decoration:none}
+.top nav a:hover{text-decoration:underline}
+.langbtn{border:0;background:var(--surface);height:36px;padding:0 14px;border-radius:var(--r);font:inherit;font-size:15px;cursor:pointer}
+.langbtn:hover{background:var(--surface-2)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 24px;align-items:center;min-height:calc(100svh - 84px);padding-block:24px 64px}
+.hero-copy{grid-column:1/6;display:flex;flex-direction:column;gap:28px}
+.hero h1{font-size:var(--step-head)}
+.hero .lead{font-size:var(--step-lead);line-height:1.35;max-width:30ch}
+.hero .acts{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.facts{display:flex;gap:10px 20px;flex-wrap:wrap;font-size:16px;color:var(--muted)}
+.stage{grid-column:7/13}
+.compare{position:relative;aspect-ratio:910/900;background:#fff;border-radius:var(--r);overflow:hidden;user-select:none;touch-action:pan-y;cursor:ew-resize}
+.compare img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
+.compare .tr{transition:opacity 1.6s ease}
+.compare .tr[hidden]{display:block;opacity:0}
+.compare .orig{clip-path:inset(0 calc(100% - var(--x,50%)) 0 0)}
+.compare .handle{position:absolute;top:0;bottom:0;left:var(--x,50%);width:3px;margin-left:-1.5px;background:var(--accent);pointer-events:none}
+.compare .knob{position:absolute;top:50%;left:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:18px}
+.compare .tag{position:absolute;top:14px;padding:5px 10px;border-radius:var(--r);background:var(--ink);color:#fff;font-size:14px;pointer-events:none}
+.compare .tag.l{left:14px}.compare .tag.r{right:14px;background:var(--accent)}
+.compare input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
+.stage-foot{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:16px}
+.stage-foot p{font-size:16px;color:var(--muted)}
+
+/* showcase */
+.show{background:var(--dark);color:var(--dark-ink);padding-block:120px 96px;margin-top:80px}
+.show-head{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;align-items:end;margin-bottom:56px}
+.show-head h2{grid-column:1/7;font-size:var(--step-head)}
+.show-head .now{grid-column:8/13;min-height:7.5em}
+.show-head .now b{display:block;font-size:24px;font-weight:500;margin-bottom:8px}
+.show-head .now p{color:var(--dark-muted);font-size:17px;max-width:44ch}
+.row{display:flex;gap:5vw;overflow-x:auto;scroll-snap-type:x mandatory;padding-inline:calc(50vw - min(340px,43vw));padding-block:8px 28px;scrollbar-width:none;cursor:grab}
+.row::-webkit-scrollbar{display:none}
+.panel{flex:none;width:min(680px,86vw);scroll-snap-align:center;opacity:.35;transition:opacity .5s var(--ease),transform .5s var(--ease);transform:scale(.94)}
+.panel.on{opacity:1;transform:none}
+.panel img{border-radius:var(--r);width:100%}
+.ctl{display:flex;gap:10px;justify-content:center;margin-top:8px}
+.ctl button{width:48px;height:48px;border-radius:50%;border:0;background:var(--dark-2);color:var(--dark-ink);font-size:20px;cursor:pointer;transition:background-color .15s,transform .15s}
+.ctl button:hover{background:#2a2e36}.ctl button:active{transform:scale(.94)}
+/* data-ui fragments: the product's own conventions apply */
+[data-ui]{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;font-size:15px;line-height:1.45;color:#16181d;background:#fff;border-radius:12px;padding:16px 18px}
+[data-ui] .uirow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+[data-ui] .uiname{font-weight:600}
+[data-ui] .uimeta{font-size:13px;color:#5d6577}
+[data-ui] .uibadge{display:inline-flex;padding:3px 10px;border-radius:99px;background:#e6f4ec;color:#17683a;font-size:13px}
+[data-ui] .uibtn{height:30px;padding:0 10px;border-radius:8px;border:1px solid #d5d9e0;background:#fff;font:inherit;font-size:13px}
+[data-ui] .uibtn.p{background:#2f6fec;border-color:#2f6fec;color:#fff;font-weight:600}
+[data-ui] .uibtn.d{border-color:#f0c9c9;color:#c93535;background:transparent}
+[data-ui] .uidot{width:9px;height:9px;border-radius:50%;background:#1f9d55}
+[data-ui] .uibar{height:4px;border-radius:2px;background:#e3e6ec;overflow:hidden;margin-top:10px}
+[data-ui] .uibar i{display:block;height:100%;width:100%;background:#2f6fec;transform-origin:left;transform:scaleX(.46);animation:grow 6s var(--ease) infinite}
+@keyframes grow{0%{transform:scaleX(.12)}80%,100%{transform:scaleX(.92)}}
+[data-ui] table{border-collapse:collapse;width:100%}
+[data-ui] td{padding:7px 8px;border-bottom:1px solid #eef0f3}
+[data-ui] .confirm{margin-top:12px;padding:10px 12px;border-radius:10px;background:#fdf3f3;color:#6b1d1d;border:1px solid #f0c9c9}
+
+/* features */
+.feat{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 24px}
+.feat-out{grid-column:1/7;position:sticky;top:0;height:100svh;background:var(--field);display:grid;place-items:center;padding:32px;margin-left:calc(-1 * var(--m))}
+.sheet{width:min(560px,100%);background:#fff;color:#111;border-radius:6px;padding:40px 36px;font-family:"Times New Roman",Times,"Songti SC",serif;transition:opacity .35s}
+.sheet.dual{width:min(720px,100%);display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.sheet .col{min-width:0}
+.sheet h4{font-size:22px;line-height:1.25;margin:0 0 6px;text-align:center}
+.sheet .au{font-size:13px;text-align:center;margin-bottom:12px}
+.sheet .ab{font-size:14.5px;line-height:1.55;text-align:justify}
+.sheet .eq{font-style:italic;text-align:center;font-size:16px;margin:12px 0;padding:4px;border-radius:3px;transition:background-color .3s,outline-color .3s;outline:2px solid transparent}
+.sheet.keep .eq{background:#fff3c4;outline-color:#e0b100}
+.sheet mark{background:transparent;transition:background-color .3s}
+.sheet.terms mark{background:#d7dcff}
+.sheet .src{color:#5d6470}
+.feat-copy{grid-column:8/13;padding-block:72px 30vh}
+.feat-copy h2{font-size:var(--step-head);margin-bottom:24vh}
+.blk{margin-bottom:34vh;max-width:44ch}
+.blk h3{font-size:clamp(1.5rem,1.2rem + 1vw,2rem);letter-spacing:-.02em;line-height:1.15;margin-bottom:14px}
+.blk p{margin-bottom:22px}
+
+/* how it works */
+.how{padding-block:160px 40px}
+.how-col{max-width:760px;margin-left:calc(100% / 12 * 3)}
+.how h2{font-size:var(--step-head);margin-bottom:64px}
+.ex{margin-bottom:88px}
+.ex>p{font-size:20px;font-weight:500;margin-bottom:16px}
+.call{position:relative;background:var(--surface);border-radius:var(--r);padding:20px 64px 20px 20px;overflow-x:auto}
+.call pre{margin:0;font-size:14px;line-height:1.6}
+.copy{position:absolute;top:12px;right:12px;height:34px;padding:0 12px;border:0;border-radius:var(--r);background:var(--ink);color:#fff;font:inherit;font-size:14px;cursor:pointer;transition:transform .15s}
+.copy:active{transform:scale(.96)}
+.resp{margin:16px 0 0 56px}
+.resp.wide{margin-left:0;width:min(1040px,calc(100vw - 2 * var(--m)))}
+.resp.wide img{border-radius:var(--r);width:100%}
+.searchui{display:flex;align-items:center;gap:10px;background:#fff;border-radius:8px;padding:10px 12px;font-size:15px}
+
+/* formats */
+.fmt{padding-block:160px}
+.fmt-head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:56px}
+.fmt-head h2{font-size:clamp(2.25rem,4vw,3.75rem)}
+.fmt-head h2 span{color:var(--muted);display:block}
+.fmt-body{display:grid;grid-template-columns:200px 1fr;gap:40px}
+.tabs{display:flex;flex-direction:column;gap:6px}
+.tabs button{text-align:left;min-height:64px;padding:10px 16px;border:0;border-radius:var(--r);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;transition:background-color .15s,color .15s}
+.tabs button:hover{background:var(--surface-2)}
+.tabs button[aria-selected=true]{background:var(--ink);color:#fff}
+.tabs b{display:block;font-weight:500;font-size:17px}
+.tabs small{font-size:14px;opacity:.85}
+.bands{display:flex;flex-direction:column;gap:4px}
+.band{display:grid;grid-template-columns:160px 1fr 1fr 190px;gap:20px;align-items:center;min-height:76px;padding:14px 20px;border-radius:8px;background:var(--surface)}
+.band:nth-child(even){background:var(--surface-2)}
+.band .f{font-weight:600;font-size:18px}
+.band .k{font-size:15px;color:var(--muted)}
+.band .o{font-size:15px;text-align:right}
+.band .lbl{display:none}
+
+/* faq */
+.faq{padding-block:80px 160px}
+.faq-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px}
+.qs{grid-column:1/6;list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:18px}
+.qs h2{font-size:18px;letter-spacing:0;color:var(--muted);font-weight:500;margin-bottom:6px}
+.qs button{display:flex;gap:14px;align-items:baseline;text-align:left;border:0;background:none;padding:0;font:inherit;font-size:18px;color:var(--muted);cursor:pointer}
+.qs button::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--muted);transform:translateY(-2px)}
+.qs button[aria-selected=true]{color:var(--ink)}
+.qs button[aria-selected=true]::before{background:var(--accent)}
+.qs .inline{display:none}
+.pane{grid-column:7/13;position:sticky;top:120px;align-self:start;font-size:clamp(1.25rem,1rem + .8vw,1.625rem);line-height:1.35;max-width:30ch;transition:opacity .15s}
+
+/* cta */
+.cta{background:var(--field);color:var(--field-ink);padding-block:120px}
+.cta-in{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;align-items:end}
+.cta h2{grid-column:1/9;font-size:var(--step-head);max-width:16ch}
+.cta .side{grid-column:9/13;display:flex;flex-direction:column;gap:18px;align-items:flex-start}
+.cta .btn{background:#fff;color:var(--accent)}
+.cta .btn:hover{background:#e8eaff}
+.cta p{font-size:17px;opacity:.92}
+
+/* footer */
+footer{padding-top:22svh}
+.foot{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:baseline;padding-bottom:30px;font-size:15px;color:var(--muted)}
+.foot .links{display:flex;gap:24px}
+.foot .links a{color:var(--ink);text-decoration:none}
+.foot .links a:hover{text-decoration:underline}
+.foot .yr{text-align:right}
+
+/* entrances */
+.rise{opacity:1}
+.js .rise{opacity:0;transform:translateY(24px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.js .rise.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.js .rise{opacity:1;transform:none}}
+
+/* phone */
+@media (max-width:900px){
+  .top nav .hide-s{display:none}
+  .hero{display:flex;flex-direction:column;align-items:stretch;min-height:auto;gap:40px;padding-top:8vh}
+  .hero h1{font-size:clamp(2.25rem,9vw,3rem)}
+  .show-head{display:block}.show-head h2{margin-bottom:24px}
+  .row{padding-inline:7vw;gap:4vw}
+  .feat{display:flex;flex-direction:column}
+  .feat-copy{display:contents}
+  .feat-copy h2{order:0;padding-top:48px}
+  .feat-out{order:1;margin-bottom:48px!important}
+  .blk{order:2}
+  .call:has(.copy){padding:56px 20px 20px}
+  .feat-out{position:relative;height:auto;min-height:0;margin:0 calc(-1 * var(--m));padding:24px 16px;align-items:start}
+  .feat-copy{padding:48px 0 10vh}
+  .feat-copy h2{margin-bottom:48px}
+  .blk{margin-bottom:72px}
+  .how-col{margin-left:0}
+  .resp{margin-left:0}
+  .fmt-body{display:block}
+  .tabs{flex-direction:row;flex-wrap:wrap;margin-bottom:16px}
+  .tabs button{flex:1 1 40%;min-height:56px}
+  .band{grid-template-columns:1fr;gap:6px}
+  .band .o{text-align:left}
+  .faq-grid{display:block}
+  .pane{display:none}
+  .qs .inline{display:block;font-size:19px;line-height:1.45;color:var(--ink);padding:10px 0 4px 22px}
+  .qs .inline[hidden]{display:none}
+  .cta-in{display:block}.cta h2{margin-bottom:32px}
+  footer{padding-top:20svh}
+  .foot{grid-template-columns:1fr;gap:8px;font-size:14px}.foot .yr{text-align:left}.foot .links{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="mark" href="#top" aria-label="LocalTranslator home"><i>译</i>LocalTranslator</a>
+    <nav aria-label="Main">
+      <a class="hide-s" href="#how" data-i="nav_how">How it works</a>
+      <a class="hide-s" href="#formats" data-i="nav_formats">Formats</a>
+      <a href="https://github.com/zjywlive/LocalTranslator">GitHub</a>
+      <button class="langbtn" id="lang" type="button" aria-label="切换到中文">中文</button>
+    </nav>
+  </header>
+
+  <main id="top">
+  <section class="hero" aria-labelledby="h1">
+    <div class="hero-copy">
+      <h1 id="h1" class="rise" data-i="h1">Translate it. Keep the page.</h1>
+      <p class="lead rise" data-i="lead">An offline Mac app that writes the translation back into the original layout, side by side with the source. A local model does the work; your files never leave your Mac.</p>
+      <div class="acts rise">
+        <a class="btn" href="https://github.com/zjywlive/LocalTranslator#quick-start" data-i="cta1">Get it on GitHub</a>
+        <a class="textlink" href="#how"><b data-i="cta2">See how it works</b> <span aria-hidden="true">→</span></a>
+      </div>
+      <p class="facts rise"><span data-i="f1">Free and open source</span><span data-i="f2">macOS on Apple Silicon</span><span data-i="f3">No API key</span></p>
+    </div>
+    <div class="stage rise">
+      <div class="compare" id="compare" data-ui style="--x:50%;padding:0;border-radius:var(--r)">
+        <img class="tr" data-lang="zh" src="assets/page-zh.png" width="910" height="900" alt="Page 1 of the sample paper translated into Chinese, same layout">
+        <img class="tr" data-lang="ja" src="assets/page-ja.png" width="910" height="900" alt="The same page translated into Japanese" hidden>
+        <img class="tr" data-lang="fr" src="assets/page-fr.png" width="910" height="900" alt="The same page translated into French" hidden>
+        <img class="orig" src="assets/page-en.png" width="910" height="900" alt="Page 1 of the English original">
+        <span class="tag l">English</span><span class="tag r" id="tagR">中文</span>
+        <div class="handle"><span class="knob" aria-hidden="true">⇆</span></div>
+        <input type="range" min="0" max="100" value="50" id="slider" aria-label="Drag to compare the original and the translation">
+      </div>
+      <div class="stage-foot">
+        <p data-i="drag">Drag across the page. Real output, unedited.</p>
+        <div class="seg" role="group" aria-label="Translation language" id="langs">
+          <button type="button" data-l="zh" aria-pressed="true">中文</button>
+          <button type="button" data-l="ja" aria-pressed="false">日本語</button>
+          <button type="button" data-l="fr" aria-pressed="false">Français</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  </main>
+</div>
+
+<section class="show" aria-labelledby="show-h">
+  <div class="wrap show-head">
+    <h2 id="show-h" class="rise" data-i="show_h">Everything happens on this machine.</h2>
+    <div class="now" aria-live="polite"><b id="nowName">The app</b><p id="nowText">Drop files in, watch each one translate, open the result. The window is a local web page on 127.0.0.1.</p></div>
+  </div>
+  <div class="row" id="row" tabindex="0" aria-label="Product views, scroll sideways">
+    <figure class="panel" style="margin:0" data-k="p1"><img src="assets/ui-light.png" width="2000" height="1440" alt="The LocalTranslator window with a finished and a running task" loading="lazy"></figure>
+    <figure class="panel" style="margin:0" data-k="p2"><img src="assets/demo.gif" width="800" height="576" alt="A paper translating from 0 to 100 percent" loading="lazy"></figure>
+    <figure class="panel" style="margin:0" data-k="p3"><img src="assets/bilingual.png" width="1819" height="900" alt="Bilingual PDF, original left and translation right" loading="lazy"></figure>
+    <figure class="panel" style="margin:0" data-k="p4">
+      <div data-ui>
+        <div class="uirow"><span class="uidot"></span><span class="uiname">模型已加载</span><span class="uimeta">hy-mt2-30b-a3b · 占用约 32.0 GB 内存</span><span style="flex:1"></span><button class="uibtn d" type="button" tabindex="-1">卸载模型</button></div>
+        <div class="confirm">卸载后会释放约 32.0 GB 内存，下次翻译时需要重新加载模型。</div>
+      </div>
+    </figure>
+    <figure class="panel" style="margin:0" data-k="p5">
+      <div data-ui>
+        <div class="uirow"><div style="flex:1"><div class="uiname">Lepora2021_TacTip.pdf</div><div class="uimeta">PDF，译为简体中文（双语对照）</div></div><span class="uimeta" style="color:#1d4fb8">翻译 37 / 80</span></div>
+        <div class="uibar"><i></i></div>
+        <div class="uirow" style="margin-top:16px;padding-top:12px;border-top:1px solid #eef0f3"><div style="flex:1"><div class="uiname">lecture.srt</div><div class="uimeta">字幕，译为简体中文（双语对照）</div></div><span class="uibadge"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" style="margin-right:4px"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>完成 · 14:30</span><button class="uibtn p" type="button" tabindex="-1">打开译文</button></div><!-- taste-skill-ignore: real product UI -->
+      </div>
+    </figure>
+    <figure class="panel" style="margin:0" data-k="p6">
+      <div data-ui>
+        <div class="uimeta" style="margin-bottom:8px">glossary.tsv</div>
+        <table><tbody>
+          <tr><td>tactile sensing</td><td>触觉传感</td></tr>
+          <tr><td>in-hand manipulation</td><td>手内操作</td></tr>
+          <tr><td>grasp stability</td><td>抓取稳定性</td></tr>
+          <tr><td>elastomer</td><td>弹性体</td></tr>
+          <tr><td>end effector</td><td>末端执行器</td></tr>
+        </tbody></table>
+      </div>
+    </figure>
+  </div>
+  <div class="ctl"><button type="button" id="prev" aria-label="Previous view">←</button><button type="button" id="next" aria-label="Next view">→</button></div>
+</section>
+
+<div class="wrap">
+  <section class="feat" aria-labelledby="feat-h">
+    <div class="feat-out">
+      <div class="sheet" id="sheet" data-ui aria-live="polite"></div>
+    </div>
+    <div class="feat-copy">
+      <h2 id="feat-h" class="rise" data-i="feat_h">Set it up your way.</h2>
+      <div class="blk rise">
+        <h3 data-i="b1h">Fourteen target languages.</h3>
+        <p data-i="b1p">Chinese, Japanese, French and eleven more. The sheet on the left is this tool's real output for the sample paper.</p>
+        <div class="seg" role="group" aria-label="Language" id="fLang">
+          <button type="button" data-v="zh" aria-pressed="true">中文</button><button type="button" data-v="ja" aria-pressed="false">日本語</button><button type="button" data-v="fr" aria-pressed="false">Français</button>
+        </div>
+      </div>
+      <div class="blk rise">
+        <h3 data-i="b2h">Bilingual or translation only.</h3>
+        <p data-i="b2p">Bilingual puts the original next to the translation, so you can check any sentence. Every PDF gets both files anyway.</p>
+        <div class="seg" role="group" aria-label="Output" id="fMode">
+          <button type="button" data-v="mono" aria-pressed="true" data-i="mono">Translation</button><button type="button" data-v="dual" aria-pressed="false" data-i="dual">Bilingual</button>
+        </div>
+      </div>
+      <div class="blk rise">
+        <h3 data-i="b3h">Formulas are left alone.</h3>
+        <p data-i="b3p">Math, figures, table bodies and reference lists stay exactly as they were. Turn this on to see what was kept.</p>
+        <div class="seg" role="group" aria-label="Show preserved parts" id="fKeep">
+          <button type="button" data-v="off" aria-pressed="true" data-i="off">Off</button><button type="button" data-v="on" aria-pressed="false" data-i="on">Show what was kept</button>
+        </div>
+      </div>
+      <div class="blk rise">
+        <h3 data-i="b4h">Your terms, every time.</h3>
+        <p data-i="b4p">A glossary fixes how key terms are translated, across every paragraph and every file. Highlight them in the sheet.</p>
+        <div class="seg" role="group" aria-label="Highlight glossary terms" id="fTerms">
+          <button type="button" data-v="off" aria-pressed="true" data-i="off">Off</button><button type="button" data-v="on" aria-pressed="false" data-i="hl">Highlight terms</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="how" aria-labelledby="how-h">
+    <div class="how-col">
+      <h2 id="how-h" class="rise" data-i="how_h">Running in five minutes.</h2>
+      <div class="ex rise">
+        <p data-i="s1">First, get the code and its one dependency.</p>
+        <div class="call"><pre><code id="c1">git clone https://github.com/zjywlive/LocalTranslator.git
+cd LocalTranslator
+/usr/bin/python3 -m pip install --user pymupdf</code></pre><button class="copy" type="button" data-copy="c1" data-i="copy">Copy</button></div>
+        <div class="resp" data-ui><span class="uimeta">Successfully installed PyMuPDF-1.26.5</span></div>
+      </div>
+      <div class="ex rise">
+        <p data-i="s2">Then download the model in LM Studio.</p>
+        <div class="call" style="padding-right:20px"><div class="searchui" data-ui><span aria-hidden="true">⌕</span><span>tencent/Hy-MT2-30B-A3B-GGUF</span></div></div>
+        <div class="resp" data-ui>
+          <div class="uirow"><span class="uiname">Hy-MT2-30B-A3B-Q8_0.gguf</span><span class="uimeta">32.0 GB · for 48 GB Macs and up</span></div>
+          <div class="uirow" style="margin-top:8px"><span class="uiname">Hy-MT2-30B-A3B-Q4_K_M.gguf</span><span class="uimeta" data-i="q4">about 19 GB · for 32 GB Macs</span></div>
+        </div>
+      </div>
+      <div class="ex rise">
+        <p data-i="s3">Finally, launch it and drop a file in.</p>
+        <div class="call"><pre><code id="c3">./build_app.sh   # creates ~/Applications/本地翻译.app</code></pre><button class="copy" type="button" data-copy="c3" data-i="copy">Copy</button></div>
+        <div class="resp wide"><img src="assets/bilingual.png" width="1819" height="900" alt="The finished bilingual PDF" loading="lazy"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fmt" id="formats" aria-labelledby="fmt-h">
+    <div class="fmt-head">
+      <h2 id="fmt-h" class="rise"><span data-i="fmt_h1">Not only PDFs.</span><span style="color:inherit" data-i="fmt_h2">Twenty-four file types.</span></h2>
+      <a class="btn rise" href="https://github.com/zjywlive/LocalTranslator#supported-formats" data-i="fmt_btn">Full format table</a>
+    </div>
+    <div class="fmt-body">
+      <div class="tabs" role="tablist" aria-label="Format groups" id="tabs"></div>
+      <div class="bands" role="tabpanel" id="bands" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="faq" aria-labelledby="faq-h">
+    <div class="faq-grid">
+      <ul class="qs" id="qs" role="tablist" aria-labelledby="faq-h"><li><h2 id="faq-h" data-i="faq_h">Common questions</h2></li></ul>
+      <div class="pane" id="pane" aria-live="polite"></div>
+    </div>
+  </section>
+</div>
+
+<section class="cta" aria-labelledby="cta-h">
+  <div class="wrap cta-in">
+    <h2 id="cta-h" class="rise" data-i="cta_h">Your next paper stays on your Mac.</h2>
+    <div class="side rise">
+      <a class="btn" href="https://github.com/zjywlive/LocalTranslator" data-i="cta_btn">Get LocalTranslator</a>
+      <p data-i="cta_p">Free and open source under AGPL-3.0. Star it if it saves you an afternoon.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <div class="foot">
+    <span data-i="foot">Offline document translation for macOS</span>
+    <span class="links"><a href="https://github.com/zjywlive/LocalTranslator">GitHub</a><a href="https://github.com/zjywlive/LocalTranslator/blob/main/README.zh-CN.md">中文 README</a><a href="https://github.com/zjywlive/LocalTranslator/blob/main/LICENSE">AGPL-3.0</a></span>
+    <span class="yr">2026</span>
+  </div>
+</footer>
+
+<script>
+document.documentElement.classList.add('js');
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- i18n ---------- */
+const ZH = {
+  nav_how:'工作原理', nav_formats:'支持格式', h1:'翻译文档，保留版面。',
+  lead:'一个离线的 Mac 应用：把译文写回原文的位置，还能和原文左右对照。翻译由本机模型完成，文件不离开你的电脑。',
+  cta1:'在 GitHub 获取', cta2:'看看怎么用', f1:'免费开源', f2:'Apple Silicon 的 Mac', f3:'不需要 API Key',
+  drag:'在页面上左右拖动。真实输出，没有修饰。', show_h:'所有事情都在这台电脑上完成。',
+  feat_h:'按你的需要设置。', b1h:'十四种目标语言。', b1p:'中文、日语、法语等十四种。左边这页就是本工具对示例论文的真实输出。',
+  b2h:'双语对照，或只要译文。', b2p:'双语对照把原文放在译文旁边，任何一句都能核对。每个 PDF 都会同时生成两种文件。',
+  b3h:'公式原样保留。', b3p:'数学公式、图片、表格内容和参考文献都保持原样。打开开关，看看哪些被保留了。',
+  b4h:'术语始终一致。', b4p:'术语表固定关键词的译法，每一段、每个文件都一样。在左边高亮看看。',
+  mono:'仅译文', dual:'双语对照', off:'关', on:'显示保留部分', hl:'高亮术语',
+  how_h:'五分钟跑起来。', s1:'第一步，下载代码并安装唯一的依赖。', s2:'然后在 LM Studio 里下载模型。', s3:'最后，启动它，把文件拖进去。',
+  copy:'复制', copied:'已复制', q4:'约 19 GB · 32 GB 内存的 Mac 可用',
+  fmt_h1:'不只是 PDF。', fmt_h2:'二十四种文件格式。', fmt_btn:'完整格式表',
+  faq_h:'常见问题', cta_h:'下一篇论文，不用离开你的 Mac。', cta_btn:'获取 LocalTranslator', cta_p:'免费开源，AGPL-3.0 许可证。如果帮你省了一个下午，点个 Star。',
+  foot:'macOS 离线文档翻译'
+};
+const EN = {}; $$('[data-i]').forEach(el => EN[el.dataset.i] = el.textContent);
+EN.copied = 'Copied';
+let lang = 'en';
+try { lang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('lt-lang') || 'en'; } catch (e) {}
+const t = k => (lang === 'zh' ? ZH : EN)[k] || EN[k] || k;
+
+const SHOW = {
+  en: {p1:['The app','Drop files in, watch each one translate, open the result. The window is a local web page on 127.0.0.1.'],
+       p2:['Live progress','Every file is a task with real progress. Several files queue up and run one after another.'],
+       p3:['Bilingual PDF','Original on the left, translation on the right, in one file. Figures and formulas are untouched.'],
+       p4:['The engine','Shows whether the model is loaded and how much memory it uses. Unloading asks first.'],
+       p5:['Tasks','Running tasks show a real count. Finished ones get one clear button: open the translation.'],
+       p6:['Glossary','A plain TSV file. Each line fixes how one term is translated.']},
+  zh: {p1:['软件界面','拖入文件，看着它翻译，打开结果。窗口是 127.0.0.1 上的本地网页。'],
+       p2:['实时进度','每个文件是一个任务，显示真实进度。多个文件排队依次处理。'],
+       p3:['双语 PDF','一个文件里，左边原文，右边译文。图片和公式都不动。'],
+       p4:['引擎栏','显示模型是否已加载、占用多少内存。卸载前会先确认。'],
+       p5:['任务列表','进行中的任务显示真实计数，完成后只有一个醒目的按钮：打开译文。'],
+       p6:['术语表','一个普通的 TSV 文件，每行固定一个术语的译法。']}
+};
+const FORMATS = {
+  en: [
+    ['PDF & scans','6 types',[['PDF','Body, headings, captions, footnotes','Figures, vector art, formulas, tables, references','*-dual.pdf + *.zh.pdf'],['Scanned PDF','Pages without text, via Apple Vision','Background colour, page geometry','Same as PDF'],['CBZ comics','Speech and captions via OCR','Artwork','Bilingual pages'],['XPS · MOBI · FB2','Converted to PDF first','Layout of the converted pages','Same as PDF']]],
+    ['Office','9 types',[['Word','Every paragraph, tables, headers, footnotes','Styles, images, numbering','Translation after each paragraph'],['doc · rtf · odt','Converted to docx with textutil','Formatting textutil keeps','docx'],['PowerPoint','Slides, notes, SmartArt','Layout, images, animations','Translation after each paragraph'],['Excel','Cells, shared strings, text boxes','Formulas, numbers, charts','original ⏎ translation']]],
+    ['E-books & web','4 types',[['EPUB','Paragraphs, headings, lists, captions','Code, images; stays reflowable','Translation after each block'],['HTML · XHTML','Block text','Markup, scripts, code','Translation after each block']]],
+    ['Text & subtitles','5 types',[['TXT','Paragraphs','Line structure','Translation after each paragraph'],['Markdown','Headings, lists, tables, quotes','Code blocks, links','Translation after each paragraph'],['SRT · VTT','Every cue','Timings','Two lines per cue']]],
+    ['Images','10 types',[['PNG · JPG · HEIC','Text found by Apple Vision','Everything that is not text','*-dual.png side by side'],['TIFF · BMP · GIF · WebP','Same as above','Same as above','*-dual.png side by side']]]
+  ],
+  zh: [
+    ['PDF 与扫描件','6 种',[['PDF','正文、标题、图注、脚注','图片、矢量图、公式、表格、参考文献','*-dual.pdf + *.zh.pdf'],['扫描版 PDF','没有文字层的页面，用 Apple Vision 识别','背景色、页面版式','同 PDF'],['CBZ 漫画','对白和说明文字（OCR）','画面','双语页面'],['XPS · MOBI · FB2','先转成 PDF','转换后的版式','同 PDF']]],
+    ['Office','9 种',[['Word','所有段落、表格、页眉页脚、脚注','样式、图片、编号','每段后插入译文'],['doc · rtf · odt','用 textutil 转成 docx','textutil 保留的格式','docx'],['PowerPoint','幻灯片、备注、SmartArt','版式、图片、动画','每段后插入译文'],['Excel','单元格、共享字符串、文本框','公式、数字、图表','原文 ⏎ 译文']]],
+    ['电子书与网页','4 种',[['EPUB','段落、标题、列表、图注','代码、图片；仍可重排','每段后附译文'],['HTML · XHTML','块级文字','标签、脚本、代码','每段后附译文']]],
+    ['文本与字幕','5 种',[['TXT','段落','行结构','每段后附译文'],['Markdown','标题、列表、表格、引用','代码块、链接','每段后附译文'],['SRT · VTT','每一条字幕','时间轴','每条两行']]],
+    ['图片','10 种',[['PNG · JPG · HEIC','Apple Vision 识别出的文字','文字以外的一切','*-dual.png 左右对照'],['TIFF · BMP · GIF · WebP','同上','同上','*-dual.png 左右对照']]]
+  ]
+};
+const FAQ = {
+  en: [['Does anything leave my Mac?','No. The app only talks to 127.0.0.1: its own window and LM Studio’s local server. OCR runs in Apple’s on-device Vision framework. There is no analytics and no update check.'],
+       ['How much memory do I need?','The Q8_0 model takes about 34 GB, so a 48 GB Mac or larger. The Q4_K_M build needs about 19 GB and runs on a 32 GB Mac.'],
+       ['Why are formulas left in English?','On purpose: translating math and table cells usually breaks them, and references are searched in their original form. Captions are translated.'],
+       ['Can I use another model?','Yes. Set model in config.json to any LM Studio model. Prompts are tuned for Hy-MT2, so other models work but may be less consistent.'],
+       ['Intel Macs, Windows, Linux?','Not yet. OCR uses Apple Vision and the launcher is macOS-only. The translation core is plain Python, so ports are welcome.'],
+       ['How fast is it?','A two-page paper takes well under a minute on an M-series Mac once the model is loaded. Every paragraph is cached, so re-runs are instant.']],
+  zh: [['会有东西离开我的 Mac 吗？','不会。程序只访问 127.0.0.1：自己的窗口和 LM Studio 的本地服务。文字识别用 Apple 本机的 Vision 框架。没有统计，也没有更新检查。'],
+       ['需要多大内存？','Q8_0 模型约占 34 GB，建议 48 GB 及以上内存；Q4_K_M 版约 19 GB，32 GB 内存的 Mac 可用。'],
+       ['为什么公式不翻译？','有意为之：翻译数学符号和表格单元格通常会弄坏它们，参考文献也要按原文检索。图注和表题会翻译。'],
+       ['能换别的模型吗？','可以。把 config.json 里的 model 改成任意 LM Studio 模型。提示词按 Hy-MT2 调过，其他模型能用，但译法可能没那么稳定。'],
+       ['支持 Intel Mac、Windows、Linux 吗？','暂时不支持。文字识别依赖 Apple Vision，启动方式也是 macOS 专用的。翻译核心是纯 Python，欢迎移植。'],
+       ['速度怎么样？','模型加载后，在 M 系列 Mac 上翻一篇两页的论文不到一分钟。每段译文都会缓存，重跑立刻完成。']]
+};
+const SHEET = {
+  en: {title:'Seeing Touch: A Short Primer on Optical Tactile Sensors', au:'A. Example and B. Sample — Example Robotics Lab', ab:'Abstract—Optical tactile sensors turn contact into images. A soft skin deforms against an object, an internal camera records the deformation, and image processing recovers contact location, force and local shape.', term:'tactile sensors'},
+  zh: {title:'《感知触摸：光学触觉传感器入门指南》', au:'A. 示例与B. 样本——示例机器人实验室', ab:'摘要—光学触觉传感器能够将接触过程转化为图像。当柔软的表层与物体接触时会发生变形，内部的摄像头则记录下这种变形情况；随后通过图像处理便可确定接触位置、作用力以及物体的局部形状。', term:'触觉传感器'},
+  ja: {title:'触覚の可視化：光学的触覚センサー入門', au:'A. 例とB. サンプル — エグザンプル・ロボティクス・ラボ', ab:'要約—光学的触覚センサは、接触を画像に変換する。柔らかい皮膚が物体に接触して変形し、内部のカメラがその変形を記録し、画像処理によって接触位置、力、局所的な形状が復元される。', term:'触覚センサ'},
+  fr: {title:'Voir au toucher : Un bref guide sur les capteurs tactiles optiques', au:'A. Exemple et B. Échantillon — Laboratoire de robotique Example', ab:'Résumé—Les capteurs tactiles optiques transforment le contact en images. Une peau souple se déforme au contact d’un objet ; une caméra interne enregistre cette déformation, et le traitement d’image permet de déterminer l’emplacement du contact, la force exercée et la forme locale de l’objet.', term:'capteurs tactiles'}
+};
+const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+/* ---------- hero compare (the live thing) ---------- */
+const cmp = $('#compare'), slider = $('#slider');
+const setX = v => cmp.style.setProperty('--x', v + '%');
+slider.addEventListener('input', () => { setX(slider.value); idle = false; });
+const LN = {zh:'中文', ja:'日本語', fr:'Français'};
+let cur = 'zh', idle = true;
+function showLang(l){
+  cur = l;
+  $$('#compare .tr').forEach(img => img.hidden = img.dataset.lang !== l);
+  $('#tagR').textContent = LN[l];
+  $$('#langs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.l === l));
+}
+$$('#langs button').forEach(b => b.onclick = () => { idle = false; showLang(b.dataset.l); });
+if (!reduce) setInterval(() => { if (idle && !document.hidden){ const order = ['zh','ja','fr']; showLang(order[(order.indexOf(cur) + 1) % 3]); } }, 5500);
+
+/* ---------- showcase row ---------- */
+const row = $('#row');
+const panels = $$('.panel');
+function setNow(p){ panels.forEach(x => x.classList.toggle('on', x === p)); const [n, d] = SHOW[lang === 'zh' ? 'zh' : 'en'][p.dataset.k]; $('#nowName').textContent = n; $('#nowText').textContent = d; }
+const centerOf = p => p.offsetLeft + p.offsetWidth / 2 - row.clientWidth / 2;
+const goTo = (p, smooth = true) => row.scrollTo({left: centerOf(p), behavior: smooth && !reduce ? 'smooth' : 'auto'});
+function pickCenter(){ const c = row.scrollLeft; let best = panels[0], bd = 1e9; panels.forEach(p => { const d = Math.abs(centerOf(p) - c); if (d < bd){ bd = d; best = p; } }); if (!best.classList.contains('on')) setNow(best); }
+let raf = 0; row.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(pickCenter); });
+const step = d => { const on = panels.findIndex(p => p.classList.contains('on')); goTo(panels[Math.max(0, Math.min(panels.length - 1, on + d))]); };
+$('#prev').onclick = () => step(-1); $('#next').onclick = () => step(1);
+row.addEventListener('keydown', e => { if (e.key === 'ArrowRight'){ e.preventDefault(); step(1); } if (e.key === 'ArrowLeft'){ e.preventDefault(); step(-1); } });
+let drag = null;
+row.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; drag = {x: e.clientX, s: row.scrollLeft}; row.style.scrollSnapType = 'none'; row.style.cursor = 'grabbing'; });
+addEventListener('pointermove', e => { if (drag) row.scrollLeft = drag.s - (e.clientX - drag.x); });
+addEventListener('pointerup', () => { if (!drag) return; drag = null; row.style.scrollSnapType = ''; row.style.cursor = ''; const on = panels.find(p => p.classList.contains('on')); if (on) goTo(on); });
+requestAnimationFrame(() => goTo(panels[0], false));
+setNow(panels[0]);
+
+/* ---------- features: the fixed output ---------- */
+const st = {lang: 'zh', mode: 'mono', keep: 'off', terms: 'off'};
+function hl(text, term){ const i = text.indexOf(term); return i < 0 ? esc(text) : esc(text.slice(0, i)) + '<mark>' + esc(term) + '</mark>' + esc(text.slice(i + term.length)); }
+function col(d, src){ return `<div class="col${src ? ' src' : ''}"><h4>${esc(d.title)}</h4><div class="au">${esc(d.au)}</div><p class="ab">${hl(d.ab, d.term)}</p><p class="eq">∇z = (−nₓ / n_z , −n_y / n_z)</p></div>`; }
+function renderSheet(){
+  const s = $('#sheet'), d = SHEET[st.lang];
+  s.className = 'sheet' + (st.mode === 'dual' ? ' dual' : '') + (st.keep === 'on' ? ' keep' : '') + (st.terms === 'on' ? ' terms' : '');
+  s.innerHTML = st.mode === 'dual' ? col(SHEET.en, true) + col(d) : col(d);
+}
+[['#fLang','lang'],['#fMode','mode'],['#fKeep','keep'],['#fTerms','terms']].forEach(([sel, key]) => {
+  $$(sel + ' button').forEach(b => b.onclick = () => { st[key] = b.dataset.v; $$(sel + ' button').forEach(x => x.setAttribute('aria-pressed', x === b)); renderSheet(); });
+});
+renderSheet();
+
+/* ---------- formats ---------- */
+let tab = 0;
+function renderFormats(){
+  const F = FORMATS[lang === 'zh' ? 'zh' : 'en'];
+  $('#tabs').innerHTML = F.map((g, i) => `<button type="button" role="tab" aria-selected="${i === tab}" data-t="${i}"><b>${esc(g[0])}</b><small>${esc(g[1])}</small></button>`).join('');
+  const L = lang === 'zh' ? ['翻译','保留','输出'] : ['Translated','Kept as is','Output'];
+  $('#bands').innerHTML = F[tab][2].map(r => `<div class="band"><span class="f">${esc(r[0])}</span><span><span class="lbl">${L[0]}: </span>${esc(r[1])}</span><span class="k"><span class="lbl">${L[1]}: </span>${esc(r[2])}</span><span class="o">${esc(r[3])}</span></div>`).join('');
+  $$('#tabs button').forEach(b => b.onclick = () => { tab = +b.dataset.t; renderFormats(); $(`#tabs button[data-t="${tab}"]`).focus(); });
+}
+
+/* ---------- faq ---------- */
+let q = 0;
+function renderFaq(){
+  const F = FAQ[lang === 'zh' ? 'zh' : 'en'];
+  $$('#qs li.q').forEach(li => li.remove());
+  F.forEach(([qq, a], i) => {
+    const li = document.createElement('li'); li.className = 'q';
+    li.innerHTML = `<button type="button" role="tab" aria-selected="${i === q}">${esc(qq)}</button><p class="inline"${i === q ? '' : ' hidden'}>${esc(a)}</p>`;
+    const b = li.querySelector('button');
+    const pick = () => { q = i; $$('#qs button').forEach((x, j) => x.setAttribute('aria-selected', j === i)); $$('#qs .inline').forEach((p, j) => p.hidden = j !== i); paneTo(a); };
+    b.addEventListener('click', pick); b.addEventListener('mouseenter', () => { if (matchMedia('(min-width: 901px)').matches) pick(); }); b.addEventListener('focus', pick);
+    $('#qs').appendChild(li);
+  });
+  $('#pane').textContent = F[q][1];
+}
+function paneTo(text){ const p = $('#pane'); if (p.textContent === text) return; p.style.opacity = 0; setTimeout(() => { p.textContent = text; p.style.opacity = 1; }, 150); }
+
+/* ---------- copy ---------- */
+$$('.copy').forEach(b => b.onclick = async () => {
+  const txt = $('#' + b.dataset.copy).textContent;
+  try { await navigator.clipboard.writeText(txt); } catch (e) { const r = document.createRange(); r.selectNodeContents($('#' + b.dataset.copy)); getSelection().removeAllRanges(); getSelection().addRange(r); }
+  b.textContent = t('copied'); setTimeout(() => b.textContent = t('copy'), 1600);
+});
+
+/* ---------- language switch ---------- */
+function applyLang(){
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  $$('[data-i]').forEach(el => el.textContent = t(el.dataset.i));
+  $('#lang').textContent = lang === 'zh' ? 'EN' : '中文';
+  $('#lang').setAttribute('aria-label', lang === 'zh' ? 'Switch to English' : '切换到中文');
+  document.title = lang === 'zh' ? 'LocalTranslator 本地翻译：离线翻译文档，保留排版' : 'LocalTranslator: translate documents offline, keep the layout';
+  renderFormats(); renderFaq();
+  const on = panels.find(p => p.classList.contains('on')); if (on) setNow(on);
+}
+$('#lang').onclick = () => { lang = lang === 'zh' ? 'en' : 'zh'; try { localStorage.setItem('lt-lang', lang); } catch (e) {} applyLang(); };
+applyLang();
+
+/* ---------- entrances ---------- */
+const rio = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  const sib = [...e.target.parentElement.children].filter(c => c.classList.contains('rise'));
+  e.target.style.transitionDelay = (Math.max(0, sib.indexOf(e.target)) * 75) + 'ms';
+  e.target.classList.add('in'); rio.unobserve(e.target);
+}), {threshold: .12});
+$$('.rise').forEach(el => rio.observe(el));
+</script>
+</body>
+</html>

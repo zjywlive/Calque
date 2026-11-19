@@ -1,0 +1,28 @@
+# 机器人/触觉领域默认术语表：原文<Tab>译文（第三列可选：目标语言，默认 zh）
+in-hand manipulation	手内操作
+dexterous manipulation	灵巧操作
+vision-based tactile sensor	视触觉传感器
+optical tactile sensor	光学触觉传感器
+tactile sensing	触觉传感
+tactile sensor	触觉传感器
+tactile servoing	触觉伺服
+grasp stability	抓取稳定性
+slip detection	滑移检测
+proprioceptive	本体感受
+cutaneous	皮肤
+soft robotics	软体机器人
+biomimetic	仿生
+shear	剪切
+compliance	柔顺性
+episode	回合
+reinforcement learning	强化学习
+proximal policy optimization	近端策略优化
+on-policy	同策略
+off-policy	异策略
+domain randomization	域随机化
+sim-to-real	仿真到现实
+e-skin	电子皮肤
+haptics	力触觉
+elastomer	弹性体
+simulator	仿真器
+end effector	末端执行器

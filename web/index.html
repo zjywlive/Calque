@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111214" media="(prefers-color-scheme: dark)">
+<title>本地翻译</title>
+<style>
+:root{color-scheme:light dark;
+  --bg:#f6f7f9;--card:#fff;--ink:#16181d;--ink2:#3d4250;--muted:#5d6577;--line:#e3e6ec;--line2:#d5d9e0;
+  --accent:#2f6fec;--accent-hover:#2560d6;--accent-ink:#1d4fb8;--soft:#eef3fe;--drop:#f3f7ff;--drop-line:#9db8f5;
+  --ok:#1f9d55;--ok-bg:#e6f4ec;--ok-ink:#17683a;--err:#c93535;--err-bg:#fde7e7;--err-ink:#8f1f1f;--err-line:#f0c9c9;
+  --warn-bg:#fdf6e7;--warn-line:#f3d9a8;--warn-ink:#5c3b00;--idle:#9aa1ae;--track:#e3e6ec}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#111214;--card:#1a1b1e;--ink:#ececee;--ink2:#c9cbd1;--muted:#a3a7b0;--line:#2b2d31;--line2:#3a3d42;
+  --accent:#5b8cff;--accent-hover:#7aa2ff;--accent-ink:#8fb0ff;--soft:#1d2433;--drop:#171c27;--drop-line:#3d5a99;
+  --ok:#3fbf75;--ok-bg:#16291e;--ok-ink:#7fd9a4;--err:#ff6b6b;--err-bg:#2e1717;--err-ink:#ffaaaa;--err-line:#5c2a2a;
+  --warn-bg:#2a2214;--warn-line:#5a4520;--warn-ink:#f1cf8a;--idle:#6b7079;--track:#2b2d31}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding:24px 20px 48px;display:flex;flex-direction:column;gap:14px}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h1{margin:0;font-size:17px;font-weight:650}
+h2{margin:0;font-size:15px;font-weight:650}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px}
+/* buttons: primary / secondary / ghost / danger, sizes sm 30 / md 36 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font:inherit;cursor:pointer;white-space:nowrap;transition:background-color .15s,border-color .15s,color .15s,transform .15s}
+.btn:hover{background:color-mix(in srgb,var(--ink) 5%,var(--card));border-color:color-mix(in srgb,var(--ink) 22%,var(--card))}
+.btn:active:not(:disabled){transform:scale(.98)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn[aria-busy=true]{color:var(--muted);cursor:progress}
+.btn.sm{height:30px;padding:0 10px;font-size:13px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--accent-ink)}
+.btn.ghost:hover{background:var(--soft)}
+.btn.danger{background:transparent;border-color:var(--err-line);color:var(--err)}
+.btn.danger:hover{background:var(--err-bg)}
+.btn.danger-solid{background:var(--err);border-color:var(--err);color:#fff}
+:where(.btn,select,#drop,summary,a):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.danger:focus-visible,.btn.danger-solid:focus-visible{outline-color:var(--err)}
+@media (prefers-reduced-motion:reduce){.btn:active:not(:disabled){transform:none}}
+/* engine bar */
+#engine{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--idle);flex:none}
+.dot.ok{background:var(--ok)}.dot.err{background:var(--err)}
+.dot.busy{background:var(--accent);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+#engineLabel{font-weight:600}
+.sp{flex:1}
+#confirm{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border-radius:12px;border:1px solid var(--err-line);background:var(--err-bg);color:var(--err-ink)}
+#confirm span{flex:1;min-width:240px}
+/* settings */
+#settings{display:flex;align-items:center;flex-wrap:wrap;gap:12px 20px;padding:12px 14px}
+#settings label{display:flex;align-items:center;gap:8px;color:var(--muted)}
+select{height:32px;padding:0 8px;border-radius:8px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font:inherit}
+/* drop zone */
+#drop{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;padding:36px 16px;border-radius:16px;border:2px dashed var(--drop-line);background:var(--drop);color:var(--ink);font:inherit;cursor:pointer;transition:background-color .15s,border-color .15s}
+#drop.hover{border-color:var(--accent);background:var(--soft)}
+#drop .big{font-size:20px;font-weight:650}
+#drop .echo{font-size:13.5px;color:var(--ink2)}
+#drop .echo b{font-weight:600}
+#drop .fmts{font-size:12.5px;color:var(--muted)}
+/* save line */
+#saveline{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;font-size:13.5px;color:var(--muted)}
+#outdir{color:var(--ink);font:13px ui-monospace,Menlo,monospace;overflow-wrap:anywhere}
+/* notice */
+.notice{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--warn-ink)}
+.notice span{flex:1}
+.notice.err{border-color:var(--err-line);background:var(--err-bg);color:var(--err-ink)}
+/* tasks */
+#tasks{padding:16px 18px;display:flex;flex-direction:column}
+#tasks .head{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.job{padding:12px 0;display:flex;flex-direction:column;gap:8px}
+.job+.job{border-top:1px solid var(--line)}
+.job .top{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap}
+.job .info{flex:1;min-width:240px}
+.job .name{font-weight:600;overflow-wrap:anywhere}
+.job .meta{font-size:13px;color:var(--muted)}
+.job .stat{color:var(--accent-ink);min-width:150px;text-align:right}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:13px}
+.badge.ok{background:var(--ok-bg);color:var(--ok-ink)}
+.badge.err{background:var(--err-bg);color:var(--err-ink)}
+.bar{height:4px;border-radius:2px;background:var(--track);overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--accent);border-radius:2px;transform-origin:left;transform:scaleX(0);transition:transform .4s cubic-bezier(.2,0,0,1)}
+.bar.indet i{width:40%;transform:none;animation:indet 1.4s ease-in-out infinite}
+@keyframes indet{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+@media (prefers-reduced-motion:reduce){.bar.indet i,.dot.busy{animation:none}}
+.job .msg{font-size:13.5px;color:var(--err-ink)}
+.job details{font-size:12.5px;color:var(--muted)}
+.job summary{cursor:pointer;padding:4px 0;width:max-content}
+.job details div{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:4px}
+.link{background:none;border:0;padding:4px 2px;color:var(--accent-ink);font:inherit;font-size:13.5px;cursor:pointer}
+.link:hover{text-decoration:underline}
+.empty{padding:22px 0;text-align:center;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>本地翻译</h1>
+    <span class="muted" style="font-size:13px">本机模型 + 本机文字识别，文件不离开这台 Mac</span>
+  </header>
+
+  <section id="engine" class="panel" aria-live="polite">
+    <span class="dot" id="engineDot" aria-hidden="true"></span>
+    <span id="engineLabel">检查引擎…</span>
+    <span class="muted" id="model" translate="no"></span>
+    <span class="muted num" id="mem"></span>
+    <span class="sp"></span>
+    <button class="btn sm" id="load" hidden>预加载模型</button>
+    <button class="btn sm danger" id="unload" hidden>卸载模型</button>
+  </section>
+
+  <div id="confirm" role="alertdialog" aria-labelledby="confirmText" hidden>
+    <span id="confirmText">卸载后会释放这部分内存，下次翻译时需要重新加载模型。</span>
+    <button class="btn sm" id="confirmNo">取消</button>
+    <button class="btn sm danger-solid" id="confirmYes">卸载</button>
+  </div>
+
+  <section id="settings" class="panel" aria-label="翻译设置">
+    <label for="target">翻译成 <select id="target"></select></label>
+    <label for="mode">输出 <select id="mode"><option value="dual">双语对照</option><option value="mono">仅译文</option></select></label>
+    <label for="ocr">PDF 文字识别 <select id="ocr"><option value="auto">自动（扫描页才识别）</option><option value="force">全部识别</option><option value="off">不识别</option></select></label>
+    <span class="sp"></span>
+    <button class="btn sm ghost" id="glossary">编辑术语表</button>
+  </section>
+
+  <button type="button" id="drop" aria-describedby="echo">
+    <span class="big">把文件拖到这里，或点击选择</span>
+    <span class="echo" id="echo">将翻译成 <b id="echoTarget">简体中文</b> · <b id="echoMode">双语对照</b> · <span id="echoOcr">PDF 自动识别扫描页</span></span>
+    <span class="fmts">支持 PDF（含扫描件）、Word、PowerPoint、Excel、EPUB、网页、文本、Markdown、字幕和图片，可一次拖入多个</span>
+  </button>
+  <input id="file" type="file" multiple hidden>
+
+  <div id="saveline">
+    <span>保存到 <span id="outdir" translate="no"></span></span>
+    <button class="link" id="choose">更改…</button>
+    <button class="link" id="openout">在访达中打开</button>
+  </div>
+
+  <div id="notices" role="status" aria-live="polite"></div>
+
+  <section id="tasks" class="panel" aria-labelledby="tasksTitle">
+    <div class="head">
+      <h2 id="tasksTitle">任务</h2>
+      <span class="muted num" id="counts" style="font-size:13px"></span>
+      <span class="sp"></span>
+      <button class="btn sm ghost" id="clear" disabled>清除已完成</button>
+    </div>
+    <div id="jobs"></div>
+    <div class="empty" id="empty">拖进文件后，进度会显示在这里</div>
+  </section>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const api = (p, body) => fetch(p, body === undefined ? {} : {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)}).then(r => r.json());
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const base = p => p.split('/').pop();
+let inited = false, exts = [], langs = {}, last = null, timer = null;
+const rows = new Map();          // job id -> {el, sig}
+const openLogs = new Set();      // job ids whose log is expanded
+const uploading = new Map();     // local placeholder id -> file name
+
+/* ---------- notices (replace alert) ---------- */
+function notify(text, kind = ''){
+  const n = document.createElement('div');
+  n.className = 'notice ' + kind;
+  n.innerHTML = `<span>${esc(text)}</span><button class="btn sm ghost">知道了</button>`;
+  n.querySelector('button').onclick = () => n.remove();
+  $('#notices').appendChild(n);
+}
+
+/* ---------- busy helper ---------- */
+async function busy(btn, label, fn){
+  const old = btn.textContent;
+  btn.setAttribute('aria-busy', 'true'); btn.textContent = label;
+  try { return await fn(); } finally { btn.removeAttribute('aria-busy'); btn.textContent = old; }
+}
+
+/* ---------- upload ---------- */
+async function upload(files){
+  const bad = files.filter(f => !exts.includes('.' + f.name.split('.').pop().toLowerCase()));
+  if (bad.length) notify(`${bad.length} 个文件不支持：${bad.map(f => f.name).join('、')}。可以先在原应用里导出为 PDF 或 Word 再拖进来。`);
+  for (const f of files.filter(f => !bad.includes(f))){
+    const uid = 'up' + Math.random().toString(36).slice(2);
+    uploading.set(uid, f.name); render();
+    const q = new URLSearchParams({name: f.name, target: $('#target').value, mode: $('#mode').value, ocr: $('#ocr').value});
+    try {
+      const r = await fetch('/api/upload?' + q, {method: 'POST', body: f}).then(r => r.json());
+      if (r.error) notify(`${f.name} 上传失败：${r.error}`, 'err');
+    } catch (e) { notify(`${f.name} 上传失败：界面服务没有响应`, 'err'); }
+    uploading.delete(uid);
+    await refresh();
+  }
+}
+
+const drop = $('#drop');
+drop.onclick = () => $('#file').click();
+$('#file').onchange = e => { upload([...e.target.files]); e.target.value = ''; };
+['dragenter','dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('hover'); }));
+['dragleave','drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('hover'); }));
+drop.addEventListener('drop', e => upload([...e.dataTransfer.files]));
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => e.preventDefault());
+
+/* ---------- settings ---------- */
+function echo(){
+  $('#echoTarget').textContent = langs[$('#target').value] || $('#target').value;
+  $('#echoMode').textContent = $('#mode').selectedOptions[0].textContent;
+  $('#echoOcr').textContent = {auto: 'PDF 自动识别扫描页', force: 'PDF 全部页面做文字识别', off: 'PDF 不做文字识别'}[$('#ocr').value];
+}
+['target','mode','ocr'].forEach(id => $('#' + id).onchange = () => { echo(); api('/api/config', {[id]: $('#' + id).value}); });
+$('#choose').onclick = async () => { const r = await api('/api/choose_output', {}); if (r.output_dir) $('#outdir').textContent = tilde(r.output_dir); };
+$('#openout').onclick = () => api('/api/open_output', {});
+$('#glossary').onclick = () => api('/api/open_glossary', {});
+$('#clear').onclick = () => api('/api/clear', {}).then(refresh);
+const tilde = p => p.replace(/^\/Users\/[^/]+/, '~');
+
+/* ---------- engine ---------- */
+$('#load').onclick = () => busy($('#load'), '正在加载…', async () => {
+  setEngine('busy', '正在加载模型…');
+  const r = await api('/api/load', {}); if (r.error) notify('模型加载失败：' + r.error, 'err');
+  await refresh(true);
+});
+$('#unload').onclick = () => { $('#confirm').hidden = false; $('#confirmNo').focus(); };
+$('#confirmNo').onclick = () => { $('#confirm').hidden = true; $('#unload').focus(); };
+$('#confirmYes').onclick = () => { $('#confirm').hidden = true; busy($('#unload'), '正在卸载…', async () => { await api('/api/unload', {}); await refresh(true); }); };
+
+function setEngine(cls, label){ $('#engineDot').className = 'dot ' + cls; $('#engineLabel').textContent = label; }
+
+function renderEngine(e, activeJobs){
+  const gb = e.size_bytes ? (e.size_bytes / 1e9).toFixed(1) : null;
+  if (e.lms === false){ setEngine('err', '没有找到 LM Studio，请先安装并打开一次'); }
+  else if (e.loaded){ setEngine('ok', '模型已加载'); }
+  else { setEngine('', '待机，翻译时自动加载'); }
+  $('#mem').textContent = e.loaded ? (gb ? `占用约 ${gb} GB 内存` : '') : '未占用内存';
+  $('#confirmText').textContent = `卸载后会释放${gb ? '约 ' + gb + ' GB ' : '这部分'}内存，下次翻译时需要重新加载模型。`;
+  $('#load').hidden = !!e.loaded || e.lms === false;
+  $('#unload').hidden = !e.loaded;
+  $('#unload').disabled = activeJobs > 0;
+  $('#unload').title = activeJobs > 0 ? '有任务正在进行，完成后才能卸载' : '';
+}
+
+/* ---------- tasks (incremental) ---------- */
+const hhmm = t => t ? new Date(t * 1000).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'}) : '';
+function outLabel(p, n){ if (n === 1) return '打开译文'; return /-dual\./.test(p) ? '打开双语对照版' : '打开纯译文版'; }
+
+function jobInner(j, primary){
+  const meta = `${esc(j.kind)}，译为${esc(langs[j.target] || j.target)}（${j.mode === 'dual' ? '双语对照' : '仅译文'}）`;
+  const head = `<div class="info"><div class="name">${esc(j.name)}</div><div class="meta">${meta}</div></div>`;
+  const log = j.log && j.log.length ? `<details data-log="${esc(j.id)}"${openLogs.has(j.id) ? ' open' : ''}><summary>查看日志</summary><div>${j.log.map(esc).join('\n')}</div></details>` : '';
+  if (j.status === 'done'){
+    const outs = j.outputs || [];
+    const btns = outs.map((p, i) => `<button class="btn sm ${i === 0 && primary ? 'primary' : ''}" data-open="${esc(p)}" title="${esc(base(p))}">${outLabel(p, outs.length)}</button>`).join('');
+    const reveal = outs.length ? `<button class="link" data-reveal="${esc(outs[0])}">在访达中显示</button>` : '';
+    return `<div class="top">${head}<span class="badge ok num">✓ 完成 · ${hhmm(j.finished)}</span>${btns}${reveal}</div>${log}`;
+  }
+  if (j.status === 'error'){
+    return `<div class="top">${head}<span class="badge err">! 出错</span></div><div class="msg">${esc(j.error || '未知错误')}</div>${log}`;
+  }
+  const known = j.status === 'running' && j.total;
+  const pct = known ? Math.round(100 * j.done / j.total) : 0;
+  const stat = j.status === 'queued' ? '排队中' : `${esc(j.stage || '处理中')}${known ? ` ${j.done} / ${j.total} · ${pct}%` : '…'}`;
+  return `<div class="top">${head}<span class="stat num">${stat}</span></div>
+    <div class="bar${known ? '' : ' indet'}" role="progressbar" aria-label="${esc(j.name)} 进度"${known ? ` aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"` : ''}><i style="${known ? `transform:scaleX(${pct / 100})` : ''}"></i></div>${log}`;
+}
+
+function render(){
+  const s = last; const jobs = s ? s.jobs : [];
+  const box = $('#jobs');
+  const lastDone = jobs.find(j => j.status === 'done');      // newest done job gets the one primary button
+  const want = [];
+  for (const [uid, name] of uploading) want.push({id: uid, local: true, name});
+  for (const j of jobs) want.push(j);
+  const keep = new Set(want.map(j => j.id));
+  for (const [id, r] of rows) if (!keep.has(id)){ r.el.remove(); rows.delete(id); openLogs.delete(id); }
+  let prev = null;
+  for (const j of want){
+    const primary = lastDone && j.id === lastDone.id;
+    const html = j.local
+      ? `<div class="top"><div class="info"><div class="name">${esc(j.name)}</div></div><span class="stat">正在上传…</span></div><div class="bar indet"><i></i></div>`
+      : jobInner(j, primary);
+    let r = rows.get(j.id);
+    if (!r){ const el = document.createElement('div'); el.className = 'job'; r = {el, sig: ''}; rows.set(j.id, r); }
+    if (r.sig !== html){
+      const bar = r.el.querySelector('.bar i');
+      const knownNow = !j.local && j.status === 'running' && j.total;
+      if (bar && knownNow && r.status === 'running' && r.el.querySelector('.bar:not(.indet)')){
+        // same running row: update text and bar in place so the transition animates
+        const pct = Math.round(100 * j.done / j.total);
+        bar.style.transform = `scaleX(${pct / 100})`;
+        r.el.querySelector('.bar').setAttribute('aria-valuenow', pct);
+        r.el.querySelector('.stat').textContent = `${j.stage || '处理中'} ${j.done} / ${j.total} · ${pct}%`;
+        const logOld = r.el.querySelector('details'), logNew = new DOMParser().parseFromString(html, 'text/html').querySelector('details');
+        if (logNew && !logOld) r.el.appendChild(logNew);
+        else if (logNew && logOld) logOld.querySelector('div').textContent = logNew.querySelector('div').textContent;
+      } else {
+        r.el.className = 'job ' + (j.status || 'uploading');
+        r.el.innerHTML = html;
+      }
+      r.sig = html; r.status = j.status;
+    }
+    if (r.el.parentNode !== box || r.el.previousElementSibling !== prev) (prev ? prev.after(r.el) : box.prepend(r.el));
+    prev = r.el;
+  }
+  $('#empty').hidden = want.length > 0;
+  const c = {running: 0, queued: 0, done: 0, error: 0};
+  jobs.forEach(j => c[j.status] = (c[j.status] || 0) + 1);
+  const parts = [];
+  if (uploading.size) parts.push(`${uploading.size} 个上传中`);
+  if (c.running + c.queued) parts.push(`${c.running + c.queued} 个进行中`);
+  if (c.done) parts.push(`${c.done} 个完成`);
+  if (c.error) parts.push(`${c.error} 个出错`);
+  $('#counts').textContent = parts.join(' · ');
+  $('#clear').disabled = !(c.done + c.error);
+  return c.running + c.queued + uploading.size;
+}
+
+document.addEventListener('toggle', e => {
+  const d = e.target; if (!d.matches || !d.matches('details[data-log]')) return;
+  d.open ? openLogs.add(d.dataset.log) : openLogs.delete(d.dataset.log);
+}, true);
+document.addEventListener('click', e => {
+  const o = e.target.closest('[data-open]'), r = e.target.closest('[data-reveal]');
+  if (o) api('/api/open', {path: o.dataset.open});
+  if (r) api('/api/reveal', {path: r.dataset.reveal});
+});
+
+/* ---------- polling ---------- */
+async function refresh(){
+  clearTimeout(timer);
+  const s = await api('/api/state').catch(() => null);
+  if (!s){
+    setEngine('err', '界面服务已停止，请重新打开「本地翻译」');
+    $('#load').hidden = $('#unload').hidden = true;
+    timer = setTimeout(refresh, 4000); return;
+  }
+  if (!inited){
+    langs = s.langs; exts = s.extensions;
+    $('#target').innerHTML = Object.entries(s.langs).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('');
+    $('#target').value = s.config.target; $('#mode').value = s.config.mode; $('#ocr').value = s.config.ocr || 'auto';
+    $('#file').accept = s.extensions.join(',');
+    echo(); inited = true;
+  }
+  $('#outdir').textContent = tilde(s.config.output_dir);
+  $('#model').textContent = s.config.model;
+  last = s;
+  const active = render();
+  renderEngine(s.engine || {}, active);
+  timer = setTimeout(refresh, active ? 1200 : 4000);
+}
+refresh();
+</script>
+</body>
+</html>
